@@ -1,0 +1,79 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff1b84ca">
+
+        <com.andexert.library.RippleView
+            android:id="@+id/main_menu_btn"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@android:drawable/ic_menu_edit" />
+
+        </com.andexert.library.RippleView>
+
+        <TextView
+            android:id="@+id/main_title_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/main_menu_btn"
+            android:text="首页"
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
+
+        <com.andexert.library.RippleView
+            android:id="@+id/main_more"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_margin="5dp">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha" />
+
+        </com.andexert.library.RippleView>
+
+        <com.andexert.library.RippleView
+            android:id="@+id/main_message"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerInParent="true"
+            android:layout_toLeftOf="@id/main_more">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/message" />
+
+        </com.andexert.library.RippleView>
+
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>
