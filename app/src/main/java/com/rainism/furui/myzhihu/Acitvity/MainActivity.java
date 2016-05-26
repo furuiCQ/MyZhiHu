@@ -4,14 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.bigkoo.convenientbanner.ConvenientBanner;
 import com.bigkoo.convenientbanner.holder.CBViewHolderCreator;
 import com.bigkoo.convenientbanner.holder.Holder;
+import com.rainism.furui.myzhihu.Adapter.MainNewsAdpater;
 import com.rainism.furui.myzhihu.Model.News;
 import com.rainism.furui.myzhihu.Model.TopNews;
 import com.rainism.furui.myzhihu.R;
@@ -36,17 +39,17 @@ public class MainActivity extends Activity {
 
     ArrayList<News> newsList = new ArrayList<News>();
     ArrayList<TopNews> topNewsList = new ArrayList<TopNews>();
-
+    MainNewsAdpater mainNewsAdpater;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mainListView = (ListView) findViewById(R.id.main_listview);
         convenientBanner = new ConvenientBanner(MainActivity.this);
-        convenientBanner.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT,300));
-
+        convenientBanner.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 450));
 
         mainListView.addHeaderView(convenientBanner);
+
         OkHttpUtils.get().url(URLModel.URL_TODAY_NEWS).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e) {
@@ -78,8 +81,8 @@ public class MainActivity extends Activity {
                             News news = new News(imagesList, type, id, ga_prefix, title);
                             newsList.add(news);
                         }
-                        mainListView.setAdapter(null);
-
+                        mainNewsAdpater=new MainNewsAdpater(MainActivity.this,newsList);
+                        mainListView.setAdapter(mainNewsAdpater);
 
 
                         JSONArray top_stories = result.getJSONArray("top_stories");
@@ -95,7 +98,7 @@ public class MainActivity extends Activity {
 
 
                         }
-                        Log.d("topNewsList.size",""+topNewsList.size());
+                        Log.d("topNewsList.size", "" + topNewsList.size());
 
                         convenientBanner.setPages(
                                 new CBViewHolderCreator<LocalImageHolderView>() {
@@ -106,7 +109,7 @@ public class MainActivity extends Activity {
                                 }, topNewsList)
                                 //设置两个点图片作为翻页指示器，不设置则没有指示器，可以根据自己需求自行配合自己的指示器,不需要圆点指示器可用不设
                                 .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
-                                .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.ALIGN_PARENT_RIGHT);
+                                .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL);
 
                     } catch (JSONException e) {
                         if (e != null) {
@@ -122,18 +125,25 @@ public class MainActivity extends Activity {
 
     public class LocalImageHolderView implements Holder<TopNews> {
         private ImageView imageView;
+        private TextView textview;
+        private View view;
 
         @Override
         public View createView(Context context) {
-            imageView = new ImageView(context);
+            LayoutInflater inflater = LayoutInflater.from(context);
+            Log.d("createView","createView");
+            view = inflater.inflate(R.layout.main_banner_view, null,false);
+            imageView = (ImageView) view.findViewById(R.id.banner_imageview);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            return imageView;
+            textview = (TextView) view.findViewById(R.id.banner_textview);
+            return view;
         }
 
         @Override
         public void UpdateUI(Context context, final int position, TopNews data) {
-            Log.d("data.getImageUrl():",data.getImageUrl());
+            Log.d("data.getImageUrl():", data.getImageUrl());
             ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl());
+            textview.setText(data.getTitle());
         }
     }
 
