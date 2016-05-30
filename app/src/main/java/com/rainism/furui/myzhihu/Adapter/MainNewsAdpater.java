@@ -69,9 +69,11 @@ public class MainNewsAdpater extends BaseAdapter {
         }
         viewHolder = (ViewHolder) convertView.getTag();
         if (!news.isTopTitle()) {
+            viewHolder.imageView.setVisibility(View.VISIBLE);
             ImageTools.downlandImageView(context, viewHolder.imageView, news.getImageUrl().get(0));
             viewHolder.linearLayout.setBackgroundResource(R.drawable.main_list_item_bg);
         } else {
+            viewHolder.imageView.setVisibility(View.GONE);
             viewHolder.imageView.setImageBitmap(null);
             viewHolder.linearLayout.setBackgroundColor(android.R.color.white);
         }

@@ -78,7 +78,9 @@
         android:id="@+id/main_listview"
         android:layout_width="match_parent"
         android:dividerHeight="10dp"
-        android:layout_height="match_parent" />
+        android:divider="#efefef"
+        android:layout_height="match_parent"
+        android:background="#ffffff"/>
 
 
 </LinearLayout>

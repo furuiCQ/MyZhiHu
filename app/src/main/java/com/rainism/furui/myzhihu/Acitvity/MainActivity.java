@@ -27,6 +27,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -79,7 +81,7 @@ public class MainActivity extends Activity {
                         JSONObject result = new JSONObject(response);
                         JSONArray stories = result.getJSONArray("stories");
 
-                        String topTitle = "今天";
+                        String topTitle = "今日新闻";
                         News topNew = new News(topTitle);
                         newsList.add(topNew);
 
@@ -195,6 +197,38 @@ public class MainActivity extends Activity {
             lastDay = "" + year + month + day;
         }
     }
+    public String DateToString(String str){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");//小写的mm表示的是分钟
+        try{
+            Date date=sdf.parse(str);
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            String mMonth = String.valueOf(c.get(Calendar.MONTH) + 1);// 获取当前月份
+            String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));// 获取当前月份的日期号码
+            String mWay = String.valueOf(c.get(Calendar.DAY_OF_WEEK));
+            if("1".equals(mWay)){
+                mWay ="日";
+            }else if("2".equals(mWay)){
+                mWay ="一";
+            }else if("3".equals(mWay)){
+                mWay ="二";
+            }else if("4".equals(mWay)){
+                mWay ="三";
+            }else if("5".equals(mWay)){
+                mWay ="四";
+            }else if("6".equals(mWay)){
+                mWay ="五";
+            }else if("7".equals(mWay)){
+                mWay ="六";
+            }
+            return mMonth + "月" + mDay+"日"+" 星期"+mWay;
+        }catch (ParseException e){
+            if (e!=null){
+                Log.e("ParseException",e.toString());
+            }
+        }
+        return "";
+    }
 
     public void getBeforeNew() {
         Log.d("请求地址：",URLModel.URL_BEFOR_NEWS + lastDay);
@@ -214,7 +248,7 @@ public class MainActivity extends Activity {
                         JSONObject result = new JSONObject(response);
                         JSONArray stories = result.getJSONArray("stories");
 
-                        String topTitle = result.getString("date");
+                        String topTitle = DateToString(result.getString("date"));
                         News topNew = new News(topTitle);
                         newsList.add(topNew);
 
