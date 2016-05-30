@@ -18,11 +18,23 @@ public class News {
     private long id;
     private String gaPrefix;
     private String title;
+    private boolean isTopTitle=false;
 
     public News() {
 
     }
 
+    public boolean isTopTitle() {
+        return isTopTitle;
+    }
+
+    public void setIsTopTitle(boolean isTopTitle) {
+        this.isTopTitle = isTopTitle;
+    }
+    public News(String title) {
+        setTitle(title);
+        setIsTopTitle(true);
+    }
     public News(ArrayList<String> imageUrl,
                 int type,
                 long id,

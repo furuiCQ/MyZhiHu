@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bigkoo.convenientbanner.ConvenientBanner;
@@ -20,6 +19,7 @@ import com.rainism.furui.myzhihu.Model.TopNews;
 import com.rainism.furui.myzhihu.R;
 import com.rainism.furui.myzhihu.Tools.ImageTools;
 import com.rainism.furui.myzhihu.Tools.URLModel;
+import com.rainism.furui.myzhihu.View.MainListview;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -28,27 +28,40 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import okhttp3.Call;
 
 
 public class MainActivity extends Activity {
 
-    ListView mainListView;
+    MainListview mainListView;
     ConvenientBanner convenientBanner;
 
     ArrayList<News> newsList = new ArrayList<News>();
     ArrayList<TopNews> topNewsList = new ArrayList<TopNews>();
     MainNewsAdpater mainNewsAdpater;
+    String lastDay;
+    Date beforeDate = new Date();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mainListView = (ListView) findViewById(R.id.main_listview);
+        mainListView = (MainListview) findViewById(R.id.main_listview);
         convenientBanner = new ConvenientBanner(MainActivity.this);
         convenientBanner.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 450));
 
         mainListView.addHeaderView(convenientBanner);
+        mainListView.initBottomView();
+        mainListView.setMyPullUpListViewCallBack(new MainListview.MyPullUpListViewCallBack() {
+            @Override
+            public void scrollBottomState() {
+                getBeforeNew();
+                getBeforeDate();
+            }
+        });
 
         OkHttpUtils.get().url(URLModel.URL_TODAY_NEWS).build().execute(new StringCallback() {
             @Override
@@ -66,6 +79,10 @@ public class MainActivity extends Activity {
                         JSONObject result = new JSONObject(response);
                         JSONArray stories = result.getJSONArray("stories");
 
+                        String topTitle = "今天";
+                        News topNew = new News(topTitle);
+                        newsList.add(topNew);
+
                         for (int i = 0; i < stories.length(); i++) {
                             JSONObject item = stories.getJSONObject(i);
                             JSONArray images = item.getJSONArray("images");
@@ -81,7 +98,7 @@ public class MainActivity extends Activity {
                             News news = new News(imagesList, type, id, ga_prefix, title);
                             newsList.add(news);
                         }
-                        mainNewsAdpater=new MainNewsAdpater(MainActivity.this,newsList);
+                        mainNewsAdpater = new MainNewsAdpater(MainActivity.this, newsList);
                         mainListView.setAdapter(mainNewsAdpater);
 
 
@@ -120,6 +137,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        getNowData();
 
     }
 
@@ -131,8 +149,8 @@ public class MainActivity extends Activity {
         @Override
         public View createView(Context context) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            Log.d("createView","createView");
-            view = inflater.inflate(R.layout.main_banner_view, null,false);
+            Log.d("createView", "createView");
+            view = inflater.inflate(R.layout.main_banner_view, null, false);
             imageView = (ImageView) view.findViewById(R.id.banner_imageview);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             textview = (TextView) view.findViewById(R.id.banner_textview);
@@ -145,6 +163,89 @@ public class MainActivity extends Activity {
             ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl());
             textview.setText(data.getTitle());
         }
+    }
+    public void getNowData(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(beforeDate);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        beforeDate = calendar.getTime();
+        if (month < 10) {
+            Log.d("beforeData", "" + year + "0" + month + day);
+            lastDay = "" + year + "0" + month + day;
+        } else {
+            Log.d("beforeData", "" + year + month + day);
+            lastDay = "" + year + month + day;
+        }
+    }
+    public void getBeforeDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(beforeDate);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        beforeDate = calendar.getTime();
+        if (month < 10) {
+            Log.d("beforeData", "" + year + "0" + month + day);
+            lastDay = "" + year + "0" + month + day;
+        } else {
+            Log.d("beforeData", "" + year + month + day);
+            lastDay = "" + year + month + day;
+        }
+    }
+
+    public void getBeforeNew() {
+        Log.d("请求地址：",URLModel.URL_BEFOR_NEWS + lastDay);
+        OkHttpUtils.get().url(URLModel.URL_BEFOR_NEWS + lastDay).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e) {
+                if (e != null) {
+                    Log.e("Exception", e.toString());
+                }
+            }
+
+            @Override
+            public void onResponse(String response) {
+                if (response != null) {
+                    Log.d("getBeforeNew response", response);
+                    try {
+                        JSONObject result = new JSONObject(response);
+                        JSONArray stories = result.getJSONArray("stories");
+
+                        String topTitle = result.getString("date");
+                        News topNew = new News(topTitle);
+                        newsList.add(topNew);
+
+                        for (int i = 0; i < stories.length(); i++) {
+                            JSONObject item = stories.getJSONObject(i);
+                            JSONArray images = item.getJSONArray("images");
+                            ArrayList<String> imagesList = new ArrayList<String>();
+                            for (int j = 0; j < images.length(); j++) {
+                                String imageUrl = images.getString(j);
+                                imagesList.add(imageUrl);
+                            }
+                            int type = item.getInt("type");
+                            long id = item.getLong("id");
+                            String ga_prefix = item.getString("ga_prefix");
+                            String title = item.getString("title");
+                            News news = new News(imagesList, type, id, ga_prefix, title);
+                            newsList.add(news);
+                        }
+                        mainNewsAdpater.setList(newsList);
+                    } catch (JSONException e) {
+                        if (e != null) {
+                            Log.e("Exception", e.toString());
+                        }
+                    }
+                }
+            }
+
+
+        });
+
+
     }
 
 }

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.rainism.furui.myzhihu.Model.News;
@@ -21,6 +22,7 @@ public class MainNewsAdpater extends BaseAdapter {
     Context context;
     ArrayList<News> newsList;
     LayoutInflater layoutInflater;
+
     public MainNewsAdpater() {
         super();
     }
@@ -28,7 +30,13 @@ public class MainNewsAdpater extends BaseAdapter {
     public MainNewsAdpater(Context context, ArrayList<News> newsList) {
         this.context = context;
         this.newsList = newsList;
-        layoutInflater=LayoutInflater.from(context);
+        layoutInflater = LayoutInflater.from(context);
+    }
+
+    public void setList(ArrayList<News> newsList) {
+        this.newsList = newsList;
+        this.notifyDataSetChanged();
+
     }
 
     @Override
@@ -49,24 +57,31 @@ public class MainNewsAdpater extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        if (convertView == null) {
-            convertView=layoutInflater.inflate(R.layout.main_list_item,null,false);
-            viewHolder=new ViewHolder();
-            viewHolder.imageView=(ImageView)convertView.findViewById(R.id.item_imageview);
-            viewHolder.textView=(TextView)convertView.findViewById(R.id.item_textview);
+        News news = newsList.get(position);
 
+        if (convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.main_list_item, null, false);
+            viewHolder = new ViewHolder();
+            viewHolder.imageView = (ImageView) convertView.findViewById(R.id.item_imageview);
+            viewHolder.textView = (TextView) convertView.findViewById(R.id.item_textview);
+            viewHolder.linearLayout = (LinearLayout) convertView.findViewById(R.id.item_linearlayout);
             convertView.setTag(viewHolder);
         }
-        viewHolder=(ViewHolder)convertView.getTag();
-        News news=newsList.get(position);
-
-        ImageTools.downlandImageView(context,viewHolder.imageView,news.getImageUrl().get(0));
+        viewHolder = (ViewHolder) convertView.getTag();
+        if (!news.isTopTitle()) {
+            ImageTools.downlandImageView(context, viewHolder.imageView, news.getImageUrl().get(0));
+            viewHolder.linearLayout.setBackgroundResource(R.drawable.main_list_item_bg);
+        } else {
+            viewHolder.imageView.setImageBitmap(null);
+            viewHolder.linearLayout.setBackgroundColor(android.R.color.white);
+        }
         viewHolder.textView.setText(news.getTitle());
         return convertView;
     }
-    class ViewHolder{
+
+    class ViewHolder {
         ImageView imageView;
         TextView textView;
-
+        LinearLayout linearLayout;
     }
 }
