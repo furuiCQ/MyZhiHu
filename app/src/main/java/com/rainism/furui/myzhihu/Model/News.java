@@ -1,11 +1,12 @@
 package com.rainism.furui.myzhihu.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2016/5/26.
  */
-public class News {
+public class News implements Serializable {
     /*"images": [
             "http://pic4.zhimg.com/b27706bad2edda887a5e42c0d1723e87.jpg"
             ],
