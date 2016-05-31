@@ -26,47 +26,51 @@ import okhttp3.Call;
 public class WelcomeActivity extends Activity {
 
     ImageView welcomeImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weclome);
 
-        welcomeImageView=(ImageView)findViewById(R.id.welcome_imageview);
+        welcomeImageView = (ImageView) findViewById(R.id.welcome_imageview);
 
 
+        Log.d("长", "" + getWindowManager().getDefaultDisplay().getWidth());
+        Log.d("宽", "" + getWindowManager().getDefaultDisplay().getHeight());
 
-
-        OkHttpUtils.get().url(URLModel.URL_START_IMAGE+"1080*1776").build().execute(new StringCallback() {
+        OkHttpUtils.get().
+                url(URLModel.URL_START_IMAGE + getWindowManager().getDefaultDisplay().getWidth() + "*" + getWindowManager().getDefaultDisplay().getHeight())
+                .build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e) {
-                if (e!=null){
-                    Log.e("Exception",e.toString());
+                if (e != null) {
+                    Log.e("Exception", e.toString());
                 }
             }
 
             @Override
             public void onResponse(String s) {
 
-                Log.d("返回结果",s);
+                Log.d("返回结果", s);
 
-                JSONObject result= null;
+                JSONObject result = null;
                 try {
                     result = new JSONObject(s);
-                    String  imageUrl=result.getString("img");
+                    String imageUrl = result.getString("img");
                     ImageTools.downlandImageView(WelcomeActivity.this, welcomeImageView, imageUrl);
 
                     Animation animation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.change_big);
                     //开始执行动画
                     welcomeImageView.startAnimation(animation);
-                    Timer timer=new Timer();
-                    TimerTask timerTask=new TimerTask() {
+                    Timer timer = new Timer();
+                    TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            Intent intent=new Intent(WelcomeActivity.this, MainActivity.class);
+                            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
                             WelcomeActivity.this.startActivity(intent);
                         }
                     };
-                    timer.schedule(timerTask,3000);
+                    timer.schedule(timerTask, 3000);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -76,7 +80,6 @@ public class WelcomeActivity extends Activity {
             }
         });
     }
-
 
 
 }

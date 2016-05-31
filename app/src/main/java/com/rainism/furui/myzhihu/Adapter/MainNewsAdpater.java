@@ -70,12 +70,19 @@ public class MainNewsAdpater extends BaseAdapter {
         viewHolder = (ViewHolder) convertView.getTag();
         if (!news.isTopTitle()) {
             viewHolder.imageView.setVisibility(View.VISIBLE);
+            viewHolder.textView.setTextSize(18);
+            viewHolder.textView.setTextColor(context.getResources().getColor(android.R.color.black));
             ImageTools.downlandImageView(context, viewHolder.imageView, news.getImageUrl().get(0));
             viewHolder.linearLayout.setBackgroundResource(R.drawable.main_list_item_bg);
+            viewHolder.linearLayout.setPadding(10,10,10,10);
         } else {
             viewHolder.imageView.setVisibility(View.GONE);
             viewHolder.imageView.setImageBitmap(null);
-            viewHolder.linearLayout.setBackgroundColor(android.R.color.white);
+            viewHolder.textView.setTextSize(15);
+            viewHolder.textView.setTextColor(context.getResources().getColor(R.color.shenhuise));
+            viewHolder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gray));
+            viewHolder.linearLayout.setPadding(0, 0,0,0);
+
         }
         viewHolder.textView.setText(news.getTitle());
         return convertView;

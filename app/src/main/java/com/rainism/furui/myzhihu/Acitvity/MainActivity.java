@@ -128,7 +128,8 @@ public class MainActivity extends Activity {
                                 }, topNewsList)
                                 //设置两个点图片作为翻页指示器，不设置则没有指示器，可以根据自己需求自行配合自己的指示器,不需要圆点指示器可用不设
                                 .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
-                                .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL);
+                                .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                                .startTurning(5000);
 
                     } catch (JSONException e) {
                         if (e != null) {
@@ -151,7 +152,7 @@ public class MainActivity extends Activity {
         @Override
         public View createView(Context context) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            Log.d("createView", "createView");
+        //    Log.d("createView", "createView");
             view = inflater.inflate(R.layout.main_banner_view, null, false);
             imageView = (ImageView) view.findViewById(R.id.banner_imageview);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -161,7 +162,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void UpdateUI(Context context, final int position, TopNews data) {
-            Log.d("data.getImageUrl():", data.getImageUrl());
+          //  Log.d("data.getImageUrl():", data.getImageUrl());
             ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl());
             textview.setText(data.getTitle());
         }
