@@ -23,11 +23,15 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.Buffer;
 
 import okhttp3.Call;
@@ -38,6 +42,8 @@ public class ContentActivity extends Activity {
 
     ImageView headerViewImageView;
     TextView headerViewTextView;
+    String str;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +58,6 @@ public class ContentActivity extends Activity {
 
 
 
-
     }
     public void initView(){
         webView=(ContentWebView)findViewById(R.id.content_webview);
@@ -60,10 +65,40 @@ public class ContentActivity extends Activity {
         headerViewImageView = (ImageView) headerView.findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         headerViewTextView = (TextView) headerView.findViewById(R.id.banner_textview);
-        webView.setEmbeddedTitleBar(headerView);
+  //      webView.setEmbeddedTitleBar(headerView);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
+        webView.getSettings().setJavaScriptEnabled(true);
+    }
+
+    public void getUrlData(String httpUrl){
+            try
+            {
+                URL url = new URL(httpUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true);
+                conn.setConnectTimeout(10000);
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("accept", "*/*");
+                String location = conn.getRequestProperty("location");
+                int resCode = conn.getResponseCode();
+                conn.connect();
+                InputStream stream = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                // 读取输入流的数据，并显示
+                while ((str = reader.readLine()) != null){
+                    System.out.println(str);
+                }
+                conn.disconnect();
+                System.out.println("ＵＲＬ　Ｄａｔａ"+str);
+                stream.close();
+            }
+            catch(Exception ee)
+            {
+                System.out.print("ee:"+ee.getMessage());
+            }
 
     }
+
     public void getNewsContent(long newsId){
         OkHttpUtils.get().url(URLModel.URL_NEWS_CONTENT+newsId).build().execute(new StringCallback() {
             @Override
@@ -110,21 +145,30 @@ public class ContentActivity extends Activity {
                             styleString += "<link href='" + str.substring(1, str.length() - 1).replace("\\","") + "'/>";
                         }
 
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getUrlData(newsContent.getShareUrl());
 
-                       // webView.loadUrl(newsContent.getShareUrl());
+                            }
+                        }).start();
 
-                         webView.loadData("<html><head> <meta charset='utf-8'/>"+styleString+"</head><body>"+newsContent.getBody()+"</body></html>", "text/html; charset=UTF-8", null);
-                        File file=new File(Environment.getExternalStorageDirectory().getPath()+"/index.txt");
+                        webView.loadUrl(newsContent.getShareUrl());
+
+                       //  webView.loadData("<html><head> <meta charset='utf-8'/>"+styleString+"</head><body>"+
+                       // newsContent.getBody()+"</body></html>", "text/html; charset=UTF-8", null);
+
+                     /*   File file=new File(Environment.getExternalStorageDirectory().getPath()+"/index.txt");
                         try{
                             file.createNewFile();
                             BufferedWriter writer=new BufferedWriter(new FileWriter(file));
-                            writer.write("<html><head> <meta charset='utf-8'/>"+styleString+"</head><body>"+newsContent.getBody()+"</body></html>");
+                            writer.write(str);
                             writer.flush();
                             writer.close();
                         }catch (IOException e){
                             e.printStackTrace();
                         }
-
+*/
 
                         webView.setWebViewClient(new WebViewClient() {
                             @Override
