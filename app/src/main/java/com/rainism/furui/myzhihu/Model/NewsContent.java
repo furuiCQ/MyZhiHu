@@ -46,35 +46,6 @@ public class NewsContent {
     private int type;
     private long id;
     private JSONArray css;
-    class Section{
-        public String thumbnail;
-        long id;
-        String name;
-
-        public String getThumbnail() {
-            return thumbnail;
-        }
-
-        public void setThumbnail(String thumbnail) {
-            this.thumbnail = thumbnail;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
 
 
     public String getBody() {

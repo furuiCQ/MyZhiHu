@@ -1,9 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-   >
+    android:orientation="vertical">
 
-</RelativeLayout>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ff1b84ca">
+
+        <com.andexert.library.RippleView
+            android:id="@+id/content_back"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/back" />
+
+        </com.andexert.library.RippleView>
+
+
+        <com.andexert.library.RippleView
+            android:id="@+id/content_praise"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawableLeft="@drawable/praise"
+                android:gravity="center_vertical"
+                android:text="0"
+                android:textColor="@color/white" />
+
+        </com.andexert.library.RippleView>
+
+        <com.andexert.library.RippleView
+            android:id="@+id/content_comment"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/content_praise">
+
+            <TextView
+                android:id="@+id/content_comment_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawableLeft="@drawable/comment"
+                android:gravity="center_vertical"
+                android:text="0"
+                android:textColor="@color/white" />
+
+        </com.andexert.library.RippleView>
+
+
+        <com.andexert.library.RippleView
+            android:id="@+id/content_collect"
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+
+            android:layout_toLeftOf="@id/content_comment">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/collect" />
+
+        </com.andexert.library.RippleView>
+
+        <com.andexert.library.RippleView
+            rv_centered="true"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:layout_toLeftOf="@id/content_collect">
+
+            <ImageView
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/share" />
+
+        </com.andexert.library.RippleView>
+
+    </RelativeLayout>
+    <com.rainism.furui.myzhihu.View.ContentWebView
+        android:id="@+id/content_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</LinearLayout>
