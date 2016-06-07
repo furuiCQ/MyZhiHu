@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
+    <com.rainism.furui.myzhihu.View.ContentWebView
+        android:id="@+id/content_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="62dp"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:background="#ffffff"
+        />
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ff1b84ca">
+        android:layout_alignParentTop="true"
+        android:background="#ff1b84ca"
+        android:padding="5dp">
 
         <com.andexert.library.RippleView
             android:id="@+id/content_back"
@@ -106,10 +122,5 @@
         </com.andexert.library.RippleView>
 
     </RelativeLayout>
-    <com.rainism.furui.myzhihu.View.ContentWebView
-        android:id="@+id/content_webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
-
-</LinearLayout>
+</RelativeLayout>

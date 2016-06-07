@@ -1,13 +1,10 @@
 package com.rainism.furui.myzhihu.Acitvity;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,16 +20,10 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.Buffer;
 
 import okhttp3.Call;
 
@@ -65,40 +56,10 @@ public class ContentActivity extends Activity {
         headerViewImageView = (ImageView) headerView.findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         headerViewTextView = (TextView) headerView.findViewById(R.id.banner_textview);
-  //      webView.setEmbeddedTitleBar(headerView);
+        webView.setEmbeddedTitleBar(headerView);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
         webView.getSettings().setJavaScriptEnabled(true);
     }
-
-    public void getUrlData(String httpUrl){
-            try
-            {
-                URL url = new URL(httpUrl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setDoInput(true);
-                conn.setConnectTimeout(10000);
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("accept", "*/*");
-                String location = conn.getRequestProperty("location");
-                int resCode = conn.getResponseCode();
-                conn.connect();
-                InputStream stream = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                // 读取输入流的数据，并显示
-                while ((str = reader.readLine()) != null){
-                    System.out.println(str);
-                }
-                conn.disconnect();
-                System.out.println("ＵＲＬ　Ｄａｔａ"+str);
-                stream.close();
-            }
-            catch(Exception ee)
-            {
-                System.out.print("ee:"+ee.getMessage());
-            }
-
-    }
-
     public void getNewsContent(long newsId){
         OkHttpUtils.get().url(URLModel.URL_NEWS_CONTENT+newsId).build().execute(new StringCallback() {
             @Override
@@ -120,84 +81,52 @@ public class ContentActivity extends Activity {
                         newsContent.setImageUrl(jsonObject.getString("image"));
                         newsContent.setShareUrl(jsonObject.getString("share_url"));
                         newsContent.setJsArray(jsonObject.getJSONArray("js"));
-                        //   newsContent.setRecommendersArray(jsonObject.getJSONArray("recommenders"));
                         newsContent.setGaPrefix(jsonObject.getString("ga_prefix"));
-                 /*      JSONObject sectionObject=jsonObject.getJSONObject("section");
-                        Section section=new Section();
-                        section.setThumbnail(sectionObject.getString("thumbnail"));
-                        section.setId(sectionObject.getLong("id"));
-                        section.setName(sectionObject.getString("name"));
-                     newsContent.setSection(section);*/
                         newsContent.setType(jsonObject.getInt("type"));
                         newsContent.setId(jsonObject.getLong("id"));
                         newsContent.setCss(jsonObject.getJSONArray("css"));
 
                         ImageTools.downlandImageView(ContentActivity.this, headerViewImageView, newsContent.getImageUrl());
                         headerViewTextView.setText(newsContent.getTitle());
-                        Log.d("body", newsContent.getBody());
-                        Log.d("js", newsContent.getJsArray().toString());
                         String css=newsContent.getCss().toString();
                         css=css.substring(1,css.length()-1);
-                        Log.d("css", css);
                         String[] strs=css.split(",");
                         String styleString="";
                         for(String str:strs) {
-                            styleString += "<link href='" + str.substring(1, str.length() - 1).replace("\\","") + "'/>";
+                            styleString += "<link href=\"" + str.substring(1, str.length() - 1).replace("\\","") + "\"/>";
                         }
+                        Log.d("body", styleString);
+                        Log.d("shareUrl", newsContent.getShareUrl());
+                        String httpHeader="<html lang=\"zh-CN\" class=\" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths show-download-banner\" style=\"\">\n" +
+                                "<head>\n" +
+                                "<meta charset=\"utf-8\">\n" +
+                                "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\">\n" +
+                                "<title>"+ newsContent.getTitle()+"</title>\n" +
+                                "<meta name=\"apple-itunes-app\" content=\"app-id=639087967, app-argument=zhihudaily://story/"+newsContent.getId()+"\">\n" +
+                                "<meta name=\"viewport\" content=\"user-scalable=no, width=device-width\">\n" +
+                                "<link rel=\"stylesheet\" href=\"http://static.daily.zhihu.com/css/share.css?v=5956a\">\n" +
+                                "<script async=\"\" src=\"http://www.google-analytics.com/analytics.js\"></script>\n" +
+                                "<script src=\"http://static.daily.zhihu.com/js/modernizr-2.6.2.min.js\"></script>\n" +
+                                "<link rel=\"canonical\" href=\"http://daily.zhihu.com/story/"+newsContent.getId()+"\">\n" +
+                                "<base target=\"_blank\">\n";
 
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                getUrlData(newsContent.getShareUrl());
 
-                            }
-                        }).start();
 
-                        webView.loadUrl(newsContent.getShareUrl());
+                        webView.loadData(httpHeader+ styleString+"</head><body>" +
+                                newsContent.getBody()+"<script src=\"http://static.daily.zhihu.com/js/jquery.1.9.1.js\"></script>\n" +
+                                "<script src=\"/js/share.js?v=49768\"></script></body></html>", "text/html; charset=UTF-8", null);
 
-                       //  webView.loadData("<html><head> <meta charset='utf-8'/>"+styleString+"</head><body>"+
-                       // newsContent.getBody()+"</body></html>", "text/html; charset=UTF-8", null);
-
-                     /*   File file=new File(Environment.getExternalStorageDirectory().getPath()+"/index.txt");
+                       File file=new File(Environment.getExternalStorageDirectory().getPath()+"/index2.html");
+                        Log.d("file.name",file.getAbsolutePath());
                         try{
                             file.createNewFile();
                             BufferedWriter writer=new BufferedWriter(new FileWriter(file));
-                            writer.write(str);
+                            writer.write(response);
                             writer.flush();
                             writer.close();
                         }catch (IOException e){
                             e.printStackTrace();
                         }
-*/
-
-                        webView.setWebViewClient(new WebViewClient() {
-                            @Override
-                            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                                super.onPageStarted(view, url, favicon);
-                            }
-
-                            @Override
-                            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                                view.loadUrl(url);
-                                return true;
-                            }
-
-                            @Override
-                            public void onPageFinished(WebView view, String url) {
-                                super.onPageFinished(view, url);
-                                view.loadUrl("javascript:window.local_obj.showSource('<head>'+"
-                                        + "document.getElementsByTagName('html')[0].innerHTML='123'+'</head>');");
-
-                            }
-
-                            @Override
-                            public void onReceivedError(WebView view, int errorCode,
-                                                        String description, String failingUrl) {
-                                super.onReceivedError(view, errorCode, description, failingUrl);
-                            }
-
-                        });
-
 
                 } catch (JSONException e) {
                         e.printStackTrace();

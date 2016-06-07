@@ -28,4 +28,6 @@ dependencies {
     compile 'com.github.traex.rippleeffect:library:1.3'
     compile 'com.bigkoo:convenientbanner:2.0.5'
 
+    compile 'com.android.support:support-annotations:23.3.0'
+    compile 'com.android.support:support-v4:23.3.0'
 }
