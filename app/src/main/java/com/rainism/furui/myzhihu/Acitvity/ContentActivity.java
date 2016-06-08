@@ -4,10 +4,11 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.lzy.widget.HeaderViewPager;
 import com.rainism.furui.myzhihu.Model.News;
 import com.rainism.furui.myzhihu.Model.NewsContent;
 import com.rainism.furui.myzhihu.R;
@@ -29,12 +30,14 @@ import okhttp3.Call;
 
 public class ContentActivity extends Activity {
     NewsContent newsContent=new NewsContent();
-    ContentWebView webView;
-
-    ImageView headerViewImageView;
-    TextView headerViewTextView;
     String str;
 
+    ContentWebView webView;
+    RelativeLayout headerView;
+    ImageView headerViewImageView;
+    TextView headerViewTextView;
+    HeaderViewPager scrollableLayout;
+    RelativeLayout cotentTitleView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,19 +49,35 @@ public class ContentActivity extends Activity {
          }
 
         initView();
-
-
-
     }
     public void initView(){
+        cotentTitleView=(RelativeLayout)findViewById(R.id.content_title);
         webView=(ContentWebView)findViewById(R.id.content_webview);
-        View headerView = getLayoutInflater().inflate(R.layout.main_banner_view, null, false);
-        headerViewImageView = (ImageView) headerView.findViewById(R.id.banner_imageview);
+        headerView=(RelativeLayout)findViewById(R.id.content_banner);
+        headerViewImageView = (ImageView) findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        headerViewTextView = (TextView) headerView.findViewById(R.id.banner_textview);
-        webView.setEmbeddedTitleBar(headerView);
+        headerViewTextView = (TextView) findViewById(R.id.banner_textview);
+       // webView.setEmbeddedTitleBar(headerView);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
         webView.getSettings().setJavaScriptEnabled(true);
+        scrollableLayout = (HeaderViewPager) findViewById(R.id.scrollableLayout);
+        scrollableLayout.setCurrentScrollableContainer(webView);
+        scrollableLayout.setOnScrollListener(new HeaderViewPager.OnScrollListener() {
+            @Override
+            public void onScroll(int currentY, int maxY) {
+                //让头部具有差速动画,如果不需要,可以不用设置
+                headerView.setTranslationY(currentY/2);
+                //动态改变标题栏的透明度,注意转化为浮点型
+                Log.d("currentY",""+currentY);
+                Log.d("maxY",""+maxY);
+                float alpha = 1.0f * currentY / maxY;
+                cotentTitleView.setAlpha(alpha);
+                //注意头部局的颜色也需要改变
+                //  status_bar_fix.setAlpha(alpha);
+                //  titleBar_title.setText("标题栏透明度(" + (int) (alpha * 100) + "%)");
+
+            }
+        });
     }
     public void getNewsContent(long newsId){
         OkHttpUtils.get().url(URLModel.URL_NEWS_CONTENT+newsId).build().execute(new StringCallback() {

@@ -1,25 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-    <com.rainism.furui.myzhihu.View.ContentWebView
-        android:id="@+id/content_webview"
+    <com.lzy.widget.HeaderViewPager
+        android:id="@+id/scrollableLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:hvp_topOffset="0dp">
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="62dp"
-        android:layout_alignParentTop="true"
-        android:visibility="gone"
-        android:background="#ffffff"
-        />
+        <RelativeLayout
+            android:id="@+id/content_banner"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:background="#48e20813">
+
+            <ImageView
+                android:id="@+id/banner_imageview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/test_image" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#46000000" />
+
+            <TextView
+                android:id="@+id/banner_textview"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:paddingBottom="25dp"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+        </RelativeLayout>
+
+        <com.rainism.furui.myzhihu.View.ContentWebView
+            android:id="@+id/content_webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.lzy.widget.HeaderViewPager>
 
     <RelativeLayout
+        android:id="@+id/content_title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -123,4 +155,4 @@
 
     </RelativeLayout>
 
-</RelativeLayout>
+</FrameLayout>

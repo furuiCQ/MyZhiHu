@@ -5,15 +5,16 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
+import com.lzy.widget.HeaderScrollHelper.ScrollableContainer;
+
 /**
  * Created by Administrator on 2016/6/1.
  */
-public class ContentWebView extends WebView {
+public class ContentWebView extends WebView implements ScrollableContainer{
    // https://github.com/jeasonlzy0216/HeaderViewPager 参考
     private View mTitleBar;
     private RelativeLayout.LayoutParams mTitleBarLayoutParams;
@@ -50,7 +51,7 @@ public class ContentWebView extends WebView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.save();
+      /*  canvas.save();
         if(mTitleBar != null) {
             int sy = getScrollY();//返回滚动顶部位置
             int sx = getScrollX();//返回滚动左边缘的位置
@@ -68,14 +69,14 @@ public class ContentWebView extends WebView {
             canvas.setMatrix(mMatrix);
             canvas.clipRect(mClipBounds);//以上下左右画一个矩形
 
-        }
+        }*/
         super.onDraw(canvas);
         canvas.restore();
     }
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if(child == mTitleBar) {
+       /* if(child == mTitleBar) {
             mClipBounds.top = getScrollY();
             mClipBounds.left = 0;
             mClipBounds.right = mClipBounds.left + child.getWidth();
@@ -90,9 +91,12 @@ public class ContentWebView extends WebView {
             child.draw(canvas);
             canvas.restore();
             return false;
-        }
+        }*/
         return super.drawChild(canvas, child, drawingTime);
     }
 
-
+    @Override
+    public View getScrollableView() {
+        return this;
+    }
 }
