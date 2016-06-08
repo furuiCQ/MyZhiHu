@@ -57,7 +57,6 @@ public class ContentActivity extends Activity {
         headerViewImageView = (ImageView) findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         headerViewTextView = (TextView) findViewById(R.id.banner_textview);
-       // webView.setEmbeddedTitleBar(headerView);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
         webView.getSettings().setJavaScriptEnabled(true);
         scrollableLayout = (HeaderViewPager) findViewById(R.id.scrollableLayout);
@@ -70,11 +69,10 @@ public class ContentActivity extends Activity {
                 //动态改变标题栏的透明度,注意转化为浮点型
                 Log.d("currentY",""+currentY);
                 Log.d("maxY",""+maxY);
-                float alpha = 1.0f * currentY / maxY;
+                float alpha = 1.0f * (maxY-currentY) / maxY;
                 cotentTitleView.setAlpha(alpha);
                 //注意头部局的颜色也需要改变
                 //  status_bar_fix.setAlpha(alpha);
-                //  titleBar_title.setText("标题栏透明度(" + (int) (alpha * 100) + "%)");
 
             }
         });
