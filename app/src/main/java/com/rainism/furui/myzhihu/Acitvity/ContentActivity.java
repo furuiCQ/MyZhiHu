@@ -103,7 +103,8 @@ public class ContentActivity extends Activity {
                         newsContent.setId(jsonObject.getLong("id"));
                         newsContent.setCss(jsonObject.getJSONArray("css"));
 
-                        ImageTools.downlandImageView(ContentActivity.this, headerViewImageView, newsContent.getImageUrl());
+                        ImageTools.downlandImageView(ContentActivity.this, headerViewImageView,
+                                newsContent.getImageUrl(), 1, newsContent.getTitle());
                         headerViewTextView.setText(newsContent.getTitle());
                         String css=newsContent.getCss().toString();
                         css=css.substring(1,css.length()-1);

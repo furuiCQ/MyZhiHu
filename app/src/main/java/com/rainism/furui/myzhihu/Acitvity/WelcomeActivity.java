@@ -37,48 +37,55 @@ public class WelcomeActivity extends Activity {
 
         Log.d("长", "" + getWindowManager().getDefaultDisplay().getWidth());
         Log.d("宽", "" + getWindowManager().getDefaultDisplay().getHeight());
-
-        OkHttpUtils.get().
-                url(URLModel.URL_START_IMAGE + getWindowManager().getDefaultDisplay().getWidth() + "*" + getWindowManager().getDefaultDisplay().getHeight())
-                .build().execute(new StringCallback() {
-            @Override
-            public void onError(Call call, Exception e) {
-                if (e != null) {
-                    Log.e("Exception", e.toString());
-                }
-            }
-
-            @Override
-            public void onResponse(String s) {
-
-                Log.d("返回结果", s);
-
-                JSONObject result = null;
-                try {
-                    result = new JSONObject(s);
-                    String imageUrl = result.getString("img");
-                    ImageTools.downlandImageView(WelcomeActivity.this, welcomeImageView, imageUrl);
-
-                    Animation animation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.change_big);
-                    //开始执行动画
-                    welcomeImageView.startAnimation(animation);
-                    Timer timer = new Timer();
-                    TimerTask timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-                            WelcomeActivity.this.startActivity(intent);
-                        }
-                    };
-                    timer.schedule(timerTask, 3000);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("Exception", e.toString());
+        if(!ImageTools.searchImageFileFromDataBase("首页",0).equals("")){
+            ImageTools.loadImageView(this,welcomeImageView,ImageTools.searchImageFileFromDataBase("首页",0));
+            goNextActivity();
+        }else{
+            OkHttpUtils.get().
+                    url(URLModel.URL_START_IMAGE + getWindowManager().getDefaultDisplay().getWidth() + "*" + getWindowManager().getDefaultDisplay().getHeight())
+                    .build().execute(new StringCallback() {
+                @Override
+                public void onError(Call call, Exception e) {
+                    if (e != null) {
+                        Log.e("Exception", e.toString());
+                    }
                 }
 
+                @Override
+                public void onResponse(String s) {
+
+                    Log.d("返回结果", s);
+
+                    JSONObject result = null;
+                    try {
+                        result = new JSONObject(s);
+                        String imageUrl = result.getString("img");
+                        ImageTools.downlandImageView(WelcomeActivity.this, welcomeImageView, imageUrl,0,"首页");
+                        goNextActivity();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("Exception", e.toString());
+                    }
+
+                }
+            });
+        }
+    }
+    public void goNextActivity(){
+        Animation animation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.change_big);
+        //开始执行动画
+        welcomeImageView.startAnimation(animation);
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+                WelcomeActivity.this.startActivity(intent);
+                finish();
             }
-        });
+        };
+        timer.schedule(timerTask, 3000);
+
     }
 
 
