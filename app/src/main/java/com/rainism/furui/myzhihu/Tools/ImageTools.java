@@ -61,7 +61,7 @@ public class ImageTools {
 
     }
 
-    public static void loadImageView(final Con  text context, final ImageView imageView,
+    public static void loadImageView(final Context context, final ImageView imageView,
                                      String imageUrl) {
         Picasso.with(context).load("file:///" + imageUrl).into(imageView);
     }
@@ -141,14 +141,28 @@ public class ImageTools {
     }
 
 
-    public static void donlandContentToDataBase() {
+    public static void donlandContentToDataBase(String body) {
 
     }
 
+    public static String searchMainNewsFileFromDataBase(String lastDay, int imageType) {
+        String searchSql = "select * from  newsCachData where type=" + imageType + " and date='" + lastDay + "'";
+        Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
+        cursor.moveToFirst();
+        String bodyUrl = "";
+        if (cursor.moveToNext()) {
+            bodyUrl = cursor.getString(cursor.getColumnIndex("bodyUrl"));
+        }
+        return bodyUrl;
+    }
 
     public static class ImageSqliteHepler extends SQLiteOpenHelper {
-        public String creatSql = "create table if not exists  imageCachData(id INTEGER primary key ,type int ,imageUrl varchar(200),imageName varchar(200))";
-        //create table tabname(col1 type1 [not null] [primary key],col2 type2 [not null],..)
+        public String creatImageSql = "create table if not exists  imageCachData(id INTEGER primary key ,type int ,imageUrl varchar(200),imageName varchar(200))";
+        //type 为0 为欢迎页文件，type为1则为新闻相关图片
+
+        public String creatContentSql = "create table if not exists newsCachData(id INTEGER primary key ,type int ,date varchar(200),bodyUrl varchar(200))";
+        //type 为0则为今日新闻 type为1则为新闻内容 date用于存储当天的新闻时间标记 ，bodyUrl用于存储本地缓存的网络数据请求
+
         private static final int VERSION = 2;
 
         public ImageSqliteHepler(Context context, String name) {
@@ -163,7 +177,9 @@ public class ImageTools {
         public void onCreate(SQLiteDatabase db) {
             System.out.println("create a database");
             //execSQL用于执行SQL语句
-            db.execSQL(creatSql);
+            db.execSQL(creatImageSql);
+        //    db.execSQL(creatContentSql);
+
         }
 
         @Override

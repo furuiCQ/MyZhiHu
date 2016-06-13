@@ -29,6 +29,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,30 +67,50 @@ public class MainActivity extends Activity {
         mainListView.setOnItemClickListener(onItemClickListener);
 
         getNowData();
-        getTodayNew();
-    }
-    MainListview.MyPullUpListViewCallBack myPullCallBack= new MainListview.MyPullUpListViewCallBack() {
-            @Override
-            public void scrollBottomState() {
-                getBeforeNew();
-                getBeforeDate();
+        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 0).equals("") || ImageTools.searchMainNewsFileFromDataBase(lastDay, 0) == null) {
+            getTodayNew();
+        } else {
+            String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 0);
+            File file = new File(bodyUrl);
+            String data = "";
+            StringBuffer stringBuffer=new StringBuffer();
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                while(bufferedReader.readLine()!=null){
+                    stringBuffer.append(bufferedReader.readLine());
+                }
+                bufferedReader.close();
+                data=stringBuffer.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            loadToDayData(data);
+        }
+    }
+
+    MainListview.MyPullUpListViewCallBack myPullCallBack = new MainListview.MyPullUpListViewCallBack() {
+        @Override
+        public void scrollBottomState() {
+            getBeforeNew();
+            getBeforeDate();
+        }
 
     };
-    AdapterView.OnItemClickListener onItemClickListener= new AdapterView.OnItemClickListener() {
+    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.i("onItemClick position",""+position);
-            Log.i("onItemClick id",""+id);
+            Log.i("onItemClick position", "" + position);
+            Log.i("onItemClick id", "" + id);
 
-            News news=newsList.get((int)id);
-            Intent intent=new Intent(MainActivity.this,ContentActivity.class);
+            News news = newsList.get((int) id);
+            Intent intent = new Intent(MainActivity.this, ContentActivity.class);
             intent.putExtra("news", news);
             MainActivity.this.startActivity(intent);
 
 
         }
     };
+
     public class LocalImageHolderView implements Holder<TopNews> {
         private ImageView imageView;
         private TextView textview;
@@ -95,7 +119,7 @@ public class MainActivity extends Activity {
         @Override
         public View createView(Context context) {
             LayoutInflater inflater = LayoutInflater.from(context);
-        //    Log.d("createView", "createView");
+            //    Log.d("createView", "createView");
             view = inflater.inflate(R.layout.main_banner_view, null, false);
             imageView = (ImageView) view.findViewById(R.id.banner_imageview);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -105,12 +129,13 @@ public class MainActivity extends Activity {
 
         @Override
         public void UpdateUI(Context context, final int position, TopNews data) {
-          //  Log.d("data.getImageUrl():", data.getImageUrl());
-            ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(),1,data.getId()+"");
+            //  Log.d("data.getImageUrl():", data.getImageUrl());
+            ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(), 1, data.getId() + "");
             textview.setText(data.getTitle());
         }
     }
-    public void getNowData(){
+
+    public void getNowData() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(beforeDate);
         int year = calendar.get(Calendar.YEAR);
@@ -125,6 +150,7 @@ public class MainActivity extends Activity {
             lastDay = "" + year + month + day;
         }
     }
+
     public void getBeforeDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(beforeDate);
@@ -141,39 +167,43 @@ public class MainActivity extends Activity {
             lastDay = "" + year + month + day;
         }
     }
-    public String DateToString(String str){
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");//小写的mm表示的是分钟
-        try{
-            Date date=sdf.parse(str);
+
+    public String DateToString(String str) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");//小写的mm表示的是分钟
+        try {
+            Date date = sdf.parse(str);
             Calendar c = Calendar.getInstance();
             c.setTime(date);
             String mMonth = String.valueOf(c.get(Calendar.MONTH) + 1);// 获取当前月份
             String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));// 获取当前月份的日期号码
             String mWay = String.valueOf(c.get(Calendar.DAY_OF_WEEK));
-            if("1".equals(mWay)){
-                mWay ="日";
-            }else if("2".equals(mWay)){
-                mWay ="一";
-            }else if("3".equals(mWay)){
-                mWay ="二";
-            }else if("4".equals(mWay)){
-                mWay ="三";
-            }else if("5".equals(mWay)){
-                mWay ="四";
-            }else if("6".equals(mWay)){
-                mWay ="五";
-            }else if("7".equals(mWay)){
-                mWay ="六";
+            if ("1".equals(mWay)) {
+                mWay = "日";
+            } else if ("2".equals(mWay)) {
+                mWay = "一";
+            } else if ("3".equals(mWay)) {
+                mWay = "二";
+            } else if ("4".equals(mWay)) {
+                mWay = "三";
+            } else if ("5".equals(mWay)) {
+                mWay = "四";
+            } else if ("6".equals(mWay)) {
+                mWay = "五";
+            } else if ("7".equals(mWay)) {
+                mWay = "六";
             }
-            return mMonth + "月" + mDay+"日"+" 星期"+mWay;
-        }catch (ParseException e){
-            if (e!=null){
-                Log.e("ParseException",e.toString());
+            return mMonth + "月" + mDay + "日" + " 星期" + mWay;
+        } catch (ParseException e) {
+            if (e != null) {
+                Log.e("ParseException", e.toString());
             }
         }
         return "";
     }
-    public void getTodayNew(){
+
+    public void getTodayNew() {
+
+
         OkHttpUtils.get().url(URLModel.URL_TODAY_NEWS).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e) {
@@ -186,70 +216,75 @@ public class MainActivity extends Activity {
             public void onResponse(String response) {
                 if (response != null) {
                     Log.d("response", response);
-                    try {
-                        JSONObject result = new JSONObject(response);
-                        JSONArray stories = result.getJSONArray("stories");
-
-                        String topTitle = "今日新闻";
-                        News topNew = new News(topTitle);
-                        newsList.add(topNew);
-
-                        for (int i = 0; i < stories.length(); i++) {
-                            JSONObject item = stories.getJSONObject(i);
-                            JSONArray images = item.getJSONArray("images");
-                            ArrayList<String> imagesList = new ArrayList<String>();
-                            for (int j = 0; j < images.length(); j++) {
-                                String imageUrl = images.getString(j);
-                                imagesList.add(imageUrl);
-                            }
-                            int type = item.getInt("type");
-                            long id = item.getLong("id");
-                            String ga_prefix = item.getString("ga_prefix");
-                            String title = item.getString("title");
-                            News news = new News(imagesList, type, id, ga_prefix, title);
-                            newsList.add(news);
-                        }
-                        mainNewsAdpater = new MainNewsAdpater(MainActivity.this, newsList);
-                        mainListView.setAdapter(mainNewsAdpater);
-
-
-                        JSONArray top_stories = result.getJSONArray("top_stories");
-                        for (int i = 0; i < top_stories.length(); i++) {
-                            JSONObject item = top_stories.getJSONObject(i);
-                            String image = item.getString("image");
-                            int type = item.getInt("type");
-                            long id = item.getLong("id");
-                            String ga_prefix = item.getString("ga_prefix");
-                            String title = item.getString("title");
-                            TopNews topNews = new TopNews(image, type, id, ga_prefix, title);
-                            topNewsList.add(topNews);
-
-
-                        }
-                        Log.d("topNewsList.size", "" + topNewsList.size());
-
-                        convenientBanner.setPages(
-                                new CBViewHolderCreator<LocalImageHolderView>() {
-                                    @Override
-                                    public LocalImageHolderView createHolder() {
-                                        return new LocalImageHolderView();
-                                    }
-                                }, topNewsList)
-                                //设置两个点图片作为翻页指示器，不设置则没有指示器，可以根据自己需求自行配合自己的指示器,不需要圆点指示器可用不设
-                                .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
-                                .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
-                                .startTurning(5000);
-
-                    } catch (JSONException e) {
-                        if (e != null) {
-                            Log.e("Exception", e.toString());
-                        }
-                    }
-
+                    loadToDayData(response);
+                    ImageTools.donlandContentToDataBase(response);
                 }
             }
         });
     }
+
+    public void loadToDayData(String data) {
+        try {
+            JSONObject result = new JSONObject(data);
+            JSONArray stories = result.getJSONArray("stories");
+
+            String topTitle = "今日新闻";
+            News topNew = new News(topTitle);
+            newsList.add(topNew);
+
+            for (int i = 0; i < stories.length(); i++) {
+                JSONObject item = stories.getJSONObject(i);
+                JSONArray images = item.getJSONArray("images");
+                ArrayList<String> imagesList = new ArrayList<String>();
+                for (int j = 0; j < images.length(); j++) {
+                    String imageUrl = images.getString(j);
+                    imagesList.add(imageUrl);
+                }
+                int type = item.getInt("type");
+                long id = item.getLong("id");
+                String ga_prefix = item.getString("ga_prefix");
+                String title = item.getString("title");
+                News news = new News(imagesList, type, id, ga_prefix, title);
+                newsList.add(news);
+            }
+            mainNewsAdpater = new MainNewsAdpater(MainActivity.this, newsList);
+            mainListView.setAdapter(mainNewsAdpater);
+
+
+            JSONArray top_stories = result.getJSONArray("top_stories");
+            for (int i = 0; i < top_stories.length(); i++) {
+                JSONObject item = top_stories.getJSONObject(i);
+                String image = item.getString("image");
+                int type = item.getInt("type");
+                long id = item.getLong("id");
+                String ga_prefix = item.getString("ga_prefix");
+                String title = item.getString("title");
+                TopNews topNews = new TopNews(image, type, id, ga_prefix, title);
+                topNewsList.add(topNews);
+
+
+            }
+            Log.d("topNewsList.size", "" + topNewsList.size());
+
+            convenientBanner.setPages(
+                    new CBViewHolderCreator<LocalImageHolderView>() {
+                        @Override
+                        public LocalImageHolderView createHolder() {
+                            return new LocalImageHolderView();
+                        }
+                    }, topNewsList)
+                    //设置两个点图片作为翻页指示器，不设置则没有指示器，可以根据自己需求自行配合自己的指示器,不需要圆点指示器可用不设
+                    .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
+                    .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                    .startTurning(5000);
+
+        } catch (JSONException e) {
+            if (e != null) {
+                Log.e("Exception", e.toString());
+            }
+        }
+    }
+
     public void getBeforeNew() {
         Log.d("请求地址：", URLModel.URL_BEFOR_NEWS + lastDay);
         OkHttpUtils.get().url(URLModel.URL_BEFOR_NEWS + lastDay).build().execute(new StringCallback() {

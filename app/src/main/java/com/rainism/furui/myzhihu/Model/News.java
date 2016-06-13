@@ -7,13 +7,6 @@ import java.util.ArrayList;
  * Created by Administrator on 2016/5/26.
  */
 public class News implements Serializable {
-    /*"images": [
-            "http://pic4.zhimg.com/b27706bad2edda887a5e42c0d1723e87.jpg"
-            ],
-            "type": 0,
-            "id": 8344044,
-            "ga_prefix": "052606",
-            "title": "瞎扯 · 如何正确地吐槽"*/
     private ArrayList<String> imageUrl;
     private int type;
     private long id;
