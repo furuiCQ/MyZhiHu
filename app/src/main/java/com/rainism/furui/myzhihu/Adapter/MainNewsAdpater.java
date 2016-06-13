@@ -72,7 +72,7 @@ public class MainNewsAdpater extends BaseAdapter {
             viewHolder.imageView.setVisibility(View.VISIBLE);
             viewHolder.textView.setTextSize(18);
             viewHolder.textView.setTextColor(context.getResources().getColor(android.R.color.black));
-            ImageTools.downlandImageView(context, viewHolder.imageView, news.getImageUrl().get(0),1,news.getTitle());
+            ImageTools.downlandImageView(context, viewHolder.imageView, news.getImageUrl().get(0),1,news.getId()+"");
             viewHolder.linearLayout.setBackgroundResource(R.drawable.main_list_item_bg);
             viewHolder.linearLayout.setPadding(10,10,10,10);
         } else {

@@ -1,7 +1,6 @@
 package com.rainism.furui.myzhihu;
 
 import android.app.Application;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.rainism.furui.myzhihu.Tools.ImageTools;
 import com.zhy.http.okhttp.OkHttpUtils;
@@ -27,7 +26,7 @@ public class MyApplication extends Application {
         OkHttpUtils.initClient(okHttpClient);
 
         ImageTools.ImageSqliteHepler imageSqliteHepler = new
-                ImageTools.ImageSqliteHepler(getApplicationContext(), "my_zhihu_test_data");
+                ImageTools.ImageSqliteHepler(getApplicationContext(), "my_zhihu_data.db");
         ImageTools.sqliteDatabase = imageSqliteHepler.getReadableDatabase();
     }
 }

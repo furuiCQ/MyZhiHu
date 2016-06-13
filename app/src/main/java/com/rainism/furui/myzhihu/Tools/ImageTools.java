@@ -18,9 +18,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -30,7 +29,6 @@ public class ImageTools {
     public static SQLiteDatabase sqliteDatabase;
 
     /**
-     *
      * @param context
      * @param imageView
      * @param imageUrl
@@ -39,58 +37,89 @@ public class ImageTools {
      */
     public static void downlandImageView(final Context context, final ImageView imageView,
                                          String imageUrl, final int imageType, final String title) {
-        Picasso.with(context).load(imageUrl).into(imageView, new Callback() {
-            @Override
-            public void onSuccess() {
-                //图片存本地
-                //将图片地址存入数据库
-                saveImageFileToDataBase(title, downlandImageToSD(context,
-                        drawableToBitmap(imageView.getDrawable()), title), imageType);
-            }
+        String localimageUrl = searchImageFileFromDataBase(title, imageType);
 
-            @Override
-            public void onError() {
-                Log.d("","图片下载失败");
-            }
-        });
+        if (localimageUrl.equals("") || localimageUrl == null) {
+            Picasso.with(context).load(imageUrl).into(imageView, new Callback() {
+                @Override
+                public void onSuccess() {
+                    //图片存本地
+                    //将图片地址存入数据库
+                    saveImageFileToDataBase(title, downlandImageToSD(context,
+                            drawableToBitmap(imageView.getDrawable()), title), imageType);
+                }
+
+                @Override
+                public void onError() {
+                    Log.d("", "图片下载失败");
+                }
+            });
+        }else{
+            Log.d("downlandImageView","加载本地图片资源:"+localimageUrl);
+            loadImageView(context,imageView,localimageUrl);
+        }
+
     }
-    public static void loadImageView(final Context context, final ImageView imageView,
-                                     String imageUrl){
-        Picasso.with(context).load("file:///"+imageUrl).into(imageView);
+
+    public static void loadImageView(final Con  text context, final ImageView imageView,
+                                     String imageUrl) {
+        Picasso.with(context).load("file:///" + imageUrl).into(imageView);
     }
 
     public static String downlandImageToSD(Context context, Bitmap bitmap, String title) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] bytes = baos.toByteArray();
+        String imageUrl = "";
         try {
-            FileOutputStream outputStream = context.openFileOutput(Environment.getExternalStorageDirectory().getPath()
-                    +"/"+title + ".png", MODE_PRIVATE);
+            imageUrl = Environment.getExternalStorageDirectory().getPath()
+                    + "/" + title + ".png";
+            if(Environment.getExternalStorageDirectory().getPath().equals("")){
+                imageUrl=context.getFilesDir()+"/" + title + ".png";
+            }
+            File file = new File(imageUrl);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream outputStream = new FileOutputStream(file);
             outputStream.write(bytes);
             outputStream.flush();
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Environment.getExternalStorageDirectory().getPath()
-                +"/"+ title + ".png";
+        return imageUrl;
     }
 
     public static void saveImageFileToDataBase(String title, String imagePath, int imageType) {
-        String inserSql="insert into imageCachData(type,imageUrl,imageName) values ('" + imageType
-                + "','" + imagePath + "','" + title + "')";
-        sqliteDatabase.execSQL(inserSql);
+        changeImageFileToDataBase(title, imagePath, imageType);
     }
-    public static String searchImageFileFromDataBase(String title,int imageType){
-        String searchSql="select * from  imageCachData where type="+imageType+" and imageName='"+title+"'";
-        Cursor cursor=sqliteDatabase.rawQuery(searchSql,null);
+
+    public static void changeImageFileToDataBase(String title, String imagePath, int imageType) {
+        String imageUrl = searchImageFileFromDataBase(title, imageType);
+        String sql = "";
+        if (imageUrl.equals("") || imageUrl == null) {
+            //insert
+            sql = "insert into imageCachData(type,imageUrl,imageName) values ('" + imageType
+                    + "','" + imagePath + "','" + title + "')";
+        } else {
+            sql = "update imageCachData set imageUrl = '" + imageUrl + "' where type = " + imageType + " and imageName='" + title + "'";
+        }
+        sqliteDatabase.execSQL(sql);
+
+    }
+
+    public static String searchImageFileFromDataBase(String title, int imageType) {
+        String searchSql = "select * from  imageCachData where type=" + imageType + " and imageName='" + title + "'";
+        Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
         cursor.moveToFirst();
-        String imageUrl="";
-        if (cursor.moveToNext()){
-            imageUrl=cursor.getString(cursor.getColumnIndex("imageUrl"));
+        String imageUrl = "";
+        if (cursor.moveToNext()) {
+            imageUrl = cursor.getString(cursor.getColumnIndex("imageUrl"));
         }
         return imageUrl;
     }
+
     public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
@@ -118,7 +147,7 @@ public class ImageTools {
 
 
     public static class ImageSqliteHepler extends SQLiteOpenHelper {
-        public String creatSql = "create table if not exists  imageCachData(id int primary key ,type int ,imageUrl varchar(200),imageName varchar(200))";
+        public String creatSql = "create table if not exists  imageCachData(id INTEGER primary key ,type int ,imageUrl varchar(200),imageName varchar(200))";
         //create table tabname(col1 type1 [not null] [primary key],col2 type2 [not null],..)
         private static final int VERSION = 2;
 

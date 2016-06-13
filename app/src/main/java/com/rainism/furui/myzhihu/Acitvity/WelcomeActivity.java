@@ -37,6 +37,8 @@ public class WelcomeActivity extends Activity {
 
         Log.d("长", "" + getWindowManager().getDefaultDisplay().getWidth());
         Log.d("宽", "" + getWindowManager().getDefaultDisplay().getHeight());
+        Log.d("首页图片地址", "" + ImageTools.searchImageFileFromDataBase("首页", 0));
+
         if(!ImageTools.searchImageFileFromDataBase("首页",0).equals("")){
             ImageTools.loadImageView(this,welcomeImageView,ImageTools.searchImageFileFromDataBase("首页",0));
             goNextActivity();
@@ -53,9 +55,7 @@ public class WelcomeActivity extends Activity {
 
                 @Override
                 public void onResponse(String s) {
-
-                    Log.d("返回结果", s);
-
+                    Log.d("首页返回结果", s);
                     JSONObject result = null;
                     try {
                         result = new JSONObject(s);

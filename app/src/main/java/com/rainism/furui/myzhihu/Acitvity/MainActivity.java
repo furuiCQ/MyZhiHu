@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
         @Override
         public void UpdateUI(Context context, final int position, TopNews data) {
           //  Log.d("data.getImageUrl():", data.getImageUrl());
-            ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(),1,data.getTitle());
+            ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(),1,data.getId()+"");
             textview.setText(data.getTitle());
         }
     }
