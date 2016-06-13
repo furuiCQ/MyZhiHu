@@ -20,6 +20,9 @@ import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 
 
 /**
@@ -54,15 +57,18 @@ public class ImageTools {
                     Log.d("", "图片下载失败");
                 }
             });
-        }else{
-            Log.d("downlandImageView","加载本地图片资源:"+localimageUrl);
-            loadImageView(context,imageView,localimageUrl);
+        } else {
+            Log.d("downlandImageView", "加载本地图片资源:" + localimageUrl);
+            loadImageView(context, imageView, localimageUrl);
         }
 
     }
 
     public static void loadImageView(final Context context, final ImageView imageView,
                                      String imageUrl) {
+        Log.d("imageUrl",imageUrl);
+        Log.d("imageView",imageView.toString());
+
         Picasso.with(context).load("file:///" + imageUrl).into(imageView);
     }
 
@@ -74,8 +80,8 @@ public class ImageTools {
         try {
             imageUrl = Environment.getExternalStorageDirectory().getPath()
                     + "/" + title + ".png";
-            if(Environment.getExternalStorageDirectory().getPath().equals("")){
-                imageUrl=context.getFilesDir()+"/" + title + ".png";
+            if (Environment.getExternalStorageDirectory().getPath().equals("")) {
+                imageUrl = context.getFilesDir() + "/" + title + ".png";
             }
             File file = new File(imageUrl);
             if (!file.exists()) {
@@ -114,7 +120,7 @@ public class ImageTools {
         Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
         cursor.moveToFirst();
         String imageUrl = "";
-        if (cursor.moveToNext()) {
+        if (cursor.moveToFirst()) {
             imageUrl = cursor.getString(cursor.getColumnIndex("imageUrl"));
         }
         return imageUrl;
@@ -141,16 +147,67 @@ public class ImageTools {
     }
 
 
-    public static void donlandContentToDataBase(String body) {
-
+    public static void donlandContentToDataBase(String title, String body, int type) {
+        String bodyUrl = Environment.getExternalStorageDirectory().getPath()
+                + "/" + title + ".txt";
+        File file = new File(bodyUrl);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            byte[] bytes = body.getBytes();
+            fileOutputStream.write(bytes);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        changeContentFileToDataBase(title, bodyUrl, type);
     }
 
-    public static String searchMainNewsFileFromDataBase(String lastDay, int imageType) {
-        String searchSql = "select * from  newsCachData where type=" + imageType + " and date='" + lastDay + "'";
+    public static void changeContentFileToDataBase(String date, String bodyUrl, int type) {
+        String contentUrl = searchMainNewsFileFromDataBase(date, type);
+        String sql = "";
+        if (contentUrl.equals("") || contentUrl == null) {
+            //insert
+            sql = "insert into newsCachData(type,date,bodyUrl) values ('" + type
+                    + "','" + date + "','" + bodyUrl + "')";
+        } else {
+            sql = "update newsCachData set bodyUrl = '" + contentUrl + "' where type = " + type + " and date='" + date + "'";
+        }
+        sqliteDatabase.execSQL(sql);
+    }
+    public static String getBeforeDate(String lastDay) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(lastDay.substring(0,4)),
+                Integer.parseInt(lastDay.substring(4,6)),
+                Integer.parseInt(lastDay.substring(6,8)));
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if (month < 10) {
+            Log.d("beforeData", "" + year + "0" + month + day);
+            lastDay = "" + year + "0" + month + day;
+        } else {
+            Log.d("beforeData", "" + year + month + day);
+            lastDay = "" + year + month + day;
+        }
+        Log.i("getBeforeDate","时间减一:"+lastDay);
+        return lastDay;
+    }
+    public static String searchMainNewsFileFromDataBase(String lastDay, int contentType) {
+        if(contentType==1){
+            lastDay=getBeforeDate(lastDay);
+        }
+        String searchSql = "select * from  newsCachData where type=" + contentType + " and date='" + lastDay + "'";
+        Log.d("searchSql",searchSql);
         Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
         cursor.moveToFirst();
+        Log.d("searchMainNewsFileFromDataBase",cursor.toString());
         String bodyUrl = "";
-        if (cursor.moveToNext()) {
+        if (cursor.moveToFirst()) {
             bodyUrl = cursor.getString(cursor.getColumnIndex("bodyUrl"));
         }
         return bodyUrl;
@@ -161,7 +218,7 @@ public class ImageTools {
         //type 为0 为欢迎页文件，type为1则为新闻相关图片
 
         public String creatContentSql = "create table if not exists newsCachData(id INTEGER primary key ,type int ,date varchar(200),bodyUrl varchar(200))";
-        //type 为0则为今日新闻 type为1则为新闻内容 date用于存储当天的新闻时间标记 ，bodyUrl用于存储本地缓存的网络数据请求
+        //type 为0则为今日新闻 type为1则为过去新闻 2为新闻内容 date用于存储当天的新闻时间标记 ，bodyUrl用于存储本地缓存的网络数据请求
 
         private static final int VERSION = 2;
 
@@ -176,9 +233,8 @@ public class ImageTools {
         @Override
         public void onCreate(SQLiteDatabase db) {
             System.out.println("create a database");
-            //execSQL用于执行SQL语句
             db.execSQL(creatImageSql);
-        //    db.execSQL(creatContentSql);
+            db.execSQL(creatContentSql);
 
         }
 

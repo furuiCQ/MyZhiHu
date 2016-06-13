@@ -41,6 +41,8 @@ import java.util.Date;
 
 import okhttp3.Call;
 
+import static android.R.attr.data;
+
 
 public class MainActivity extends Activity {
 
@@ -67,34 +69,71 @@ public class MainActivity extends Activity {
         mainListView.setOnItemClickListener(onItemClickListener);
 
         getNowData();
-        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 0).equals("") || ImageTools.searchMainNewsFileFromDataBase(lastDay, 0) == null) {
+        loadLocalTodayData();
+    }
+
+    public void loadLocalTodayData() {
+        Log.d("MainActivity", "首页banner数据地址:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 0));
+        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 0).equals("") ||
+                ImageTools.searchMainNewsFileFromDataBase(lastDay, 0) == null) {
             getTodayNew();
         } else {
             String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 0);
+            Log.d("MainActivity loadToDayData", "加载本地数据:" + bodyUrl);
+
             File file = new File(bodyUrl);
             String data = "";
-            StringBuffer stringBuffer=new StringBuffer();
+            StringBuffer stringBuffer = new StringBuffer();
+            String line;
             try {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-                while(bufferedReader.readLine()!=null){
-                    stringBuffer.append(bufferedReader.readLine());
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuffer.append(line);
                 }
                 bufferedReader.close();
-                data=stringBuffer.toString();
+                data = stringBuffer.toString();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             loadToDayData(data);
         }
     }
+    public void loadLocalBeforeData(){
+        Log.d("MainActivity", "过去文章:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 1));
+        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 1).equals("") ||
+                ImageTools.searchMainNewsFileFromDataBase(lastDay, 1) == null) {
+            getBeforeNew();
+        } else {
+            String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 1);
+            Log.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
+
+            File file = new File(bodyUrl);
+            String data = "";
+            StringBuffer stringBuffer = new StringBuffer();
+            String line;
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuffer.append(line);
+                }
+                bufferedReader.close();
+                data = stringBuffer.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            loadBeforeData(data);
+        }
+    }
+
 
     MainListview.MyPullUpListViewCallBack myPullCallBack = new MainListview.MyPullUpListViewCallBack() {
         @Override
         public void scrollBottomState() {
-            getBeforeNew();
+            loadLocalBeforeData();
             getBeforeDate();
         }
-
     };
     AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -106,8 +145,6 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(MainActivity.this, ContentActivity.class);
             intent.putExtra("news", news);
             MainActivity.this.startActivity(intent);
-
-
         }
     };
 
@@ -119,7 +156,6 @@ public class MainActivity extends Activity {
         @Override
         public View createView(Context context) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            //    Log.d("createView", "createView");
             view = inflater.inflate(R.layout.main_banner_view, null, false);
             imageView = (ImageView) view.findViewById(R.id.banner_imageview);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -129,7 +165,6 @@ public class MainActivity extends Activity {
 
         @Override
         public void UpdateUI(Context context, final int position, TopNews data) {
-            //  Log.d("data.getImageUrl():", data.getImageUrl());
             ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(), 1, data.getId() + "");
             textview.setText(data.getTitle());
         }
@@ -166,6 +201,8 @@ public class MainActivity extends Activity {
             Log.d("beforeData", "" + year + month + day);
             lastDay = "" + year + month + day;
         }
+        Log.i("getBeforeDate","时间减一:"+lastDay);
+
     }
 
     public String DateToString(String str) {
@@ -217,13 +254,15 @@ public class MainActivity extends Activity {
                 if (response != null) {
                     Log.d("response", response);
                     loadToDayData(response);
-                    ImageTools.donlandContentToDataBase(response);
+                    ImageTools.donlandContentToDataBase(lastDay, response, 0);
                 }
             }
         });
     }
 
     public void loadToDayData(String data) {
+        Log.i("data", data);
+
         try {
             JSONObject result = new JSONObject(data);
             JSONArray stories = result.getJSONArray("stories");
@@ -285,6 +324,39 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void loadBeforeData(String data) {
+        Log.d("getBeforeNew response", data);
+        try {
+            JSONObject result = new JSONObject(data);
+            JSONArray stories = result.getJSONArray("stories");
+
+            String topTitle = DateToString(result.getString("date"));
+            News topNew = new News(topTitle);
+            newsList.add(topNew);
+
+            for (int i = 0; i < stories.length(); i++) {
+                JSONObject item = stories.getJSONObject(i);
+                JSONArray images = item.getJSONArray("images");
+                ArrayList<String> imagesList = new ArrayList<String>();
+                for (int j = 0; j < images.length(); j++) {
+                    String imageUrl = images.getString(j);
+                    imagesList.add(imageUrl);
+                }
+                int type = item.getInt("type");
+                long id = item.getLong("id");
+                String ga_prefix = item.getString("ga_prefix");
+                String title = item.getString("title");
+                News news = new News(imagesList, type, id, ga_prefix, title);
+                newsList.add(news);
+            }
+            mainNewsAdpater.setList(newsList);
+        } catch (JSONException e) {
+            if (e != null) {
+                Log.e("Exception", e.toString());
+            }
+        }
+    }
+
     public void getBeforeNew() {
         Log.d("请求地址：", URLModel.URL_BEFOR_NEWS + lastDay);
         OkHttpUtils.get().url(URLModel.URL_BEFOR_NEWS + lastDay).build().execute(new StringCallback() {
@@ -298,36 +370,9 @@ public class MainActivity extends Activity {
             @Override
             public void onResponse(String response) {
                 if (response != null) {
-                    Log.d("getBeforeNew response", response);
-                    try {
-                        JSONObject result = new JSONObject(response);
-                        JSONArray stories = result.getJSONArray("stories");
+                    loadBeforeData(response);
+                    ImageTools.donlandContentToDataBase(lastDay, response, 1);
 
-                        String topTitle = DateToString(result.getString("date"));
-                        News topNew = new News(topTitle);
-                        newsList.add(topNew);
-
-                        for (int i = 0; i < stories.length(); i++) {
-                            JSONObject item = stories.getJSONObject(i);
-                            JSONArray images = item.getJSONArray("images");
-                            ArrayList<String> imagesList = new ArrayList<String>();
-                            for (int j = 0; j < images.length(); j++) {
-                                String imageUrl = images.getString(j);
-                                imagesList.add(imageUrl);
-                            }
-                            int type = item.getInt("type");
-                            long id = item.getLong("id");
-                            String ga_prefix = item.getString("ga_prefix");
-                            String title = item.getString("title");
-                            News news = new News(imagesList, type, id, ga_prefix, title);
-                            newsList.add(news);
-                        }
-                        mainNewsAdpater.setList(newsList);
-                    } catch (JSONException e) {
-                        if (e != null) {
-                            Log.e("Exception", e.toString());
-                        }
-                    }
                 }
             }
 
