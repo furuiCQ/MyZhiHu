@@ -76,7 +76,7 @@
         </com.andexert.library.RippleView>
 
 
-        <com.andexert.library.RippleView
+<!--        <com.andexert.library.RippleView
             android:id="@+id/content_praise"
             rv_centered="true"
             android:layout_width="?android:actionBarSize"
@@ -94,9 +94,9 @@
                 android:text="0"
                 android:textColor="@color/white" />
 
-        </com.andexert.library.RippleView>
+        </com.andexert.library.RippleView>-->
 
-        <com.andexert.library.RippleView
+<!--        <com.andexert.library.RippleView
             android:id="@+id/content_comment"
             rv_centered="true"
             android:layout_width="?android:actionBarSize"
@@ -114,10 +114,10 @@
                 android:text="0"
                 android:textColor="@color/white" />
 
-        </com.andexert.library.RippleView>
+        </com.andexert.library.RippleView>-->
 
 
-        <com.andexert.library.RippleView
+    <!--    <com.andexert.library.RippleView
             android:id="@+id/content_collect"
             rv_centered="true"
             android:layout_width="?android:actionBarSize"
@@ -134,7 +134,7 @@
                 android:padding="10dp"
                 android:src="@drawable/collect" />
 
-        </com.andexert.library.RippleView>
+        </com.andexert.library.RippleView>-->
 
         <com.andexert.library.RippleView
             rv_centered="true"
@@ -142,7 +142,7 @@
             android:layout_height="?android:actionBarSize"
             android:layout_centerVertical="true"
             android:layout_margin="5dp"
-            android:layout_toLeftOf="@id/content_collect">
+            android:layout_alignParentRight="true">
 
             <ImageView
                 android:layout_width="?android:actionBarSize"

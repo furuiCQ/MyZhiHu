@@ -1,14 +1,16 @@
 package com.rainism.furui.myzhihu.Acitvity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.view.View.OnClickListener;
 
 import com.andexert.library.RippleView;
 import com.lzy.widget.HeaderViewPager;
@@ -33,7 +35,10 @@ import java.io.IOException;
 
 import okhttp3.Call;
 
-public class ContentActivity extends Activity {
+/**
+ * Created by Administrator on 2016/6/15.
+ */
+public class ContentFragment extends Fragment{
     NewsContent newsContent = new NewsContent();
     String contentId;
 
@@ -44,30 +49,32 @@ public class ContentActivity extends Activity {
     HeaderViewPager scrollableLayout;
     RelativeLayout cotentTitleView;
     RippleView backView;
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_content);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view=inflater.inflate(R.layout.activity_content,null);
         initView();
-        if (getIntent().getExtras() != null) {
-            News news = (News) getIntent().getExtras().getSerializable("news");
+        if (getArguments() != null) {
+            News news = (News) getArguments().getSerializable("news");
             Log.d("news.title:", "" + news.getId());
             contentId=""+news.getId();
             loadNewsContent(news.getId() + "");
         }
+        return view;
     }
 
     public void initView() {
-        backView=(RippleView)findViewById(R.id.content_back);
-        cotentTitleView = (RelativeLayout) findViewById(R.id.content_title);
-        webView = (ContentWebView) findViewById(R.id.content_webview);
-        headerView = (RelativeLayout) findViewById(R.id.content_banner);
-        headerViewImageView = (ImageView) findViewById(R.id.banner_imageview);
+        backView=(RippleView)getActivity().findViewById(R.id.content_back);
+        cotentTitleView = (RelativeLayout)getActivity(). findViewById(R.id.content_title);
+        webView = (ContentWebView)getActivity(). findViewById(R.id.content_webview);
+        headerView = (RelativeLayout) getActivity().findViewById(R.id.content_banner);
+        headerViewImageView = (ImageView) getActivity().findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        headerViewTextView = (TextView) findViewById(R.id.banner_textview);
+        headerViewTextView = (TextView) getActivity().findViewById(R.id.banner_textview);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
         webView.getSettings().setJavaScriptEnabled(true);
-        scrollableLayout = (HeaderViewPager) findViewById(R.id.scrollableLayout);
+        scrollableLayout = (HeaderViewPager) getActivity().findViewById(R.id.scrollableLayout);
         scrollableLayout.setCurrentScrollableContainer(webView);
         scrollableLayout.setOnScrollListener(new HeaderViewPager.OnScrollListener() {
             @Override
@@ -83,12 +90,12 @@ public class ContentActivity extends Activity {
         });
         backView.setOnClickListener(onClickListener);
     }
-    OnClickListener onClickListener=new OnClickListener(){
+    View.OnClickListener onClickListener=new View.OnClickListener(){
         @Override
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.content_back:
-                    ContentActivity.this.finish();
+
                     break;
                 default:
                     break;
@@ -137,7 +144,7 @@ public class ContentActivity extends Activity {
             newsContent.setId(jsonObject.getLong("id"));
             newsContent.setCss(jsonObject.getJSONArray("css"));
 
-            ImageTools.downlandImageView(ContentActivity.this, headerViewImageView,
+            ImageTools.downlandImageView(getActivity(), headerViewImageView,
                     newsContent.getImageUrl(), 1, newsContent.getId() + "");
             headerViewTextView.setText(newsContent.getTitle());
             String css = newsContent.getCss().toString();

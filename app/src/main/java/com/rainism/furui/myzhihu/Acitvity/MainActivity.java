@@ -1,9 +1,11 @@
 package com.rainism.furui.myzhihu.Acitvity;
 
-import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +46,7 @@ import okhttp3.Call;
 import static android.R.attr.data;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
 
     MainListview mainListView;
     ConvenientBanner convenientBanner;
@@ -54,6 +56,7 @@ public class MainActivity extends Activity {
     MainNewsAdpater mainNewsAdpater;
     String lastDay;
     Date beforeDate = new Date();
+    ContentFragment contentFragment=new ContentFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,7 @@ public class MainActivity extends Activity {
         mainListView.initBottomView();
         mainListView.setMyPullUpListViewCallBack(myPullCallBack);
         mainListView.setOnItemClickListener(onItemClickListener);
+
 
         getNowData();
         loadLocalTodayData();
@@ -142,9 +146,16 @@ public class MainActivity extends Activity {
             Log.i("onItemClick id", "" + id);
 
             News news = newsList.get((int) id);
-            Intent intent = new Intent(MainActivity.this, ContentActivity.class);
+           /*Intent intent = new Intent(MainActivity.this, ContentActivity.class);
             intent.putExtra("news", news);
-            MainActivity.this.startActivity(intent);
+            MainActivity.this.startActivity(intent);*/
+
+            FragmentManager fragmentManager=getSupportFragmentManager();
+            Bundle bundle=new Bundle();
+            bundle.putSerializable("news",news);
+            contentFragment.setArguments(bundle);
+            fragmentManager.beginTransaction().add(contentFragment,"").commit();
+
         }
     };
 
