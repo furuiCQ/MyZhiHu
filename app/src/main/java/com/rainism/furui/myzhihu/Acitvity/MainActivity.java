@@ -1,395 +1,99 @@
 package com.rainism.furui.myzhihu.Acitvity;
 
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 
 import com.bigkoo.convenientbanner.ConvenientBanner;
-import com.bigkoo.convenientbanner.holder.CBViewHolderCreator;
-import com.bigkoo.convenientbanner.holder.Holder;
 import com.rainism.furui.myzhihu.Adapter.MainNewsAdpater;
+import com.rainism.furui.myzhihu.Fragment.ContentFragment;
+import com.rainism.furui.myzhihu.Fragment.MainFragment;
 import com.rainism.furui.myzhihu.Model.News;
 import com.rainism.furui.myzhihu.Model.TopNews;
 import com.rainism.furui.myzhihu.R;
-import com.rainism.furui.myzhihu.Tools.ImageTools;
-import com.rainism.furui.myzhihu.Tools.URLModel;
+import com.rainism.furui.myzhihu.View.CustomViewPager;
 import com.rainism.furui.myzhihu.View.MainListview;
-import com.zhy.http.okhttp.OkHttpUtils;
-import com.zhy.http.okhttp.callback.StringCallback;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-
-import okhttp3.Call;
-
-import static android.R.attr.data;
 
 
 public class MainActivity extends FragmentActivity {
 
-    MainListview mainListView;
-    ConvenientBanner convenientBanner;
-
-    ArrayList<News> newsList = new ArrayList<News>();
-    ArrayList<TopNews> topNewsList = new ArrayList<TopNews>();
-    MainNewsAdpater mainNewsAdpater;
-    String lastDay;
-    Date beforeDate = new Date();
-    ContentFragment contentFragment=new ContentFragment();
-
+    ArrayList<Fragment> fragments = new ArrayList<Fragment>();
+    ContentFragment contentFragment = new ContentFragment();
+    MainFragment mainFragment = new MainFragment();
+    CustomViewPager viewPager;
+    News news;
+    int pagerNumb=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mainListView = (MainListview) findViewById(R.id.main_listview);
-        convenientBanner = new ConvenientBanner(MainActivity.this);
-        convenientBanner.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 450));
+        setContentView(R.layout.activity_base);
+        viewPager = (CustomViewPager) findViewById(R.id.main_viewpager);
 
-        mainListView.addHeaderView(convenientBanner);
-        mainListView.initBottomView();
-        mainListView.setMyPullUpListViewCallBack(myPullCallBack);
-        mainListView.setOnItemClickListener(onItemClickListener);
+        fragments.add(mainFragment);
+        fragments.add(contentFragment);
 
+        viewPager.setAdapter(new FragmentAdapter(getSupportFragmentManager()));
+        viewPager.setCurrentItem(pagerNumb);
+        viewPager.setOffscreenPageLimit(1);
+    }
+    public void setPagerNumb(int numb){
+        pagerNumb=numb;
+        viewPager.setCurrentItem(pagerNumb);
 
-        getNowData();
-        loadLocalTodayData();
     }
 
-    public void loadLocalTodayData() {
-        Log.d("MainActivity", "首页banner数据地址:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 0));
-        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 0).equals("") ||
-                ImageTools.searchMainNewsFileFromDataBase(lastDay, 0) == null) {
-            getTodayNew();
-        } else {
-            String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 0);
-            Log.d("MainActivity loadToDayData", "加载本地数据:" + bodyUrl);
-
-            File file = new File(bodyUrl);
-            String data = "";
-            StringBuffer stringBuffer = new StringBuffer();
-            String line;
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuffer.append(line);
-                }
-                bufferedReader.close();
-                data = stringBuffer.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            loadToDayData(data);
-        }
+    public ViewPager getViewPager() {
+        return viewPager;
     }
-    public void loadLocalBeforeData(){
-        Log.d("MainActivity", "过去文章:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 1));
-        if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 1).equals("") ||
-                ImageTools.searchMainNewsFileFromDataBase(lastDay, 1) == null) {
-            getBeforeNew();
-        } else {
-            String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 1);
-            Log.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
+    public void setFragmentData(News news){
+        this.news=news;
+        contentFragment.loadData();
 
-            File file = new File(bodyUrl);
-            String data = "";
-            StringBuffer stringBuffer = new StringBuffer();
-            String line;
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuffer.append(line);
-                }
-                bufferedReader.close();
-                data = stringBuffer.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            loadBeforeData(data);
-        }
+    }
+    public News getFragmentData(){
+        return this.news;
     }
 
-
-    MainListview.MyPullUpListViewCallBack myPullCallBack = new MainListview.MyPullUpListViewCallBack() {
-        @Override
-        public void scrollBottomState() {
-            loadLocalBeforeData();
-            getBeforeDate();
-        }
-    };
-    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.i("onItemClick position", "" + position);
-            Log.i("onItemClick id", "" + id);
-
-            News news = newsList.get((int) id);
-           /*Intent intent = new Intent(MainActivity.this, ContentActivity.class);
-            intent.putExtra("news", news);
-            MainActivity.this.startActivity(intent);*/
-
-            FragmentManager fragmentManager=getSupportFragmentManager();
-            Bundle bundle=new Bundle();
-            bundle.putSerializable("news",news);
-            contentFragment.setArguments(bundle);
-            fragmentManager.beginTransaction().add(contentFragment,"").commit();
-
-        }
-    };
-
-    public class LocalImageHolderView implements Holder<TopNews> {
-        private ImageView imageView;
-        private TextView textview;
-        private View view;
+    public class FragmentAdapter extends FragmentPagerAdapter {
 
         @Override
-        public View createView(Context context) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            view = inflater.inflate(R.layout.main_banner_view, null, false);
-            imageView = (ImageView) view.findViewById(R.id.banner_imageview);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            textview = (TextView) view.findViewById(R.id.banner_textview);
-            return view;
+        public long getItemId(int position) {
+            return super.getItemId(position);
         }
 
         @Override
-        public void UpdateUI(Context context, final int position, TopNews data) {
-            ImageTools.downlandImageView(MainActivity.this, imageView, data.getImageUrl(), 1, data.getId() + "");
-            textview.setText(data.getTitle());
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
+
+
+        public FragmentAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+
+        @Override
+        public int getCount() {
+            return fragments.size();
         }
     }
 
-    public void getNowData() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(beforeDate);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        beforeDate = calendar.getTime();
-        if (month < 10) {
-            Log.d("beforeData", "" + year + "0" + month + day);
-            lastDay = "" + year + "0" + month + day;
-        } else {
-            Log.d("beforeData", "" + year + month + day);
-            lastDay = "" + year + month + day;
-        }
-    }
-
-    public void getBeforeDate() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(beforeDate);
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        beforeDate = calendar.getTime();
-        if (month < 10) {
-            Log.d("beforeData", "" + year + "0" + month + day);
-            lastDay = "" + year + "0" + month + day;
-        } else {
-            Log.d("beforeData", "" + year + month + day);
-            lastDay = "" + year + month + day;
-        }
-        Log.i("getBeforeDate","时间减一:"+lastDay);
-
-    }
-
-    public String DateToString(String str) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");//小写的mm表示的是分钟
-        try {
-            Date date = sdf.parse(str);
-            Calendar c = Calendar.getInstance();
-            c.setTime(date);
-            String mMonth = String.valueOf(c.get(Calendar.MONTH) + 1);// 获取当前月份
-            String mDay = String.valueOf(c.get(Calendar.DAY_OF_MONTH));// 获取当前月份的日期号码
-            String mWay = String.valueOf(c.get(Calendar.DAY_OF_WEEK));
-            if ("1".equals(mWay)) {
-                mWay = "日";
-            } else if ("2".equals(mWay)) {
-                mWay = "一";
-            } else if ("3".equals(mWay)) {
-                mWay = "二";
-            } else if ("4".equals(mWay)) {
-                mWay = "三";
-            } else if ("5".equals(mWay)) {
-                mWay = "四";
-            } else if ("6".equals(mWay)) {
-                mWay = "五";
-            } else if ("7".equals(mWay)) {
-                mWay = "六";
-            }
-            return mMonth + "月" + mDay + "日" + " 星期" + mWay;
-        } catch (ParseException e) {
-            if (e != null) {
-                Log.e("ParseException", e.toString());
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            if(pagerNumb==1){
+                setPagerNumb(0);
+                return false;
             }
         }
-        return "";
+        return super.onKeyDown(keyCode, event);
     }
-
-    public void getTodayNew() {
-
-
-        OkHttpUtils.get().url(URLModel.URL_TODAY_NEWS).build().execute(new StringCallback() {
-            @Override
-            public void onError(Call call, Exception e) {
-                if (e != null) {
-                    Log.e("Exception", e.toString());
-                }
-            }
-
-            @Override
-            public void onResponse(String response) {
-                if (response != null) {
-                    Log.d("response", response);
-                    loadToDayData(response);
-                    ImageTools.donlandContentToDataBase(lastDay, response, 0);
-                }
-            }
-        });
-    }
-
-    public void loadToDayData(String data) {
-        Log.i("data", data);
-
-        try {
-            JSONObject result = new JSONObject(data);
-            JSONArray stories = result.getJSONArray("stories");
-
-            String topTitle = "今日新闻";
-            News topNew = new News(topTitle);
-            newsList.add(topNew);
-
-            for (int i = 0; i < stories.length(); i++) {
-                JSONObject item = stories.getJSONObject(i);
-                JSONArray images = item.getJSONArray("images");
-                ArrayList<String> imagesList = new ArrayList<String>();
-                for (int j = 0; j < images.length(); j++) {
-                    String imageUrl = images.getString(j);
-                    imagesList.add(imageUrl);
-                }
-                int type = item.getInt("type");
-                long id = item.getLong("id");
-                String ga_prefix = item.getString("ga_prefix");
-                String title = item.getString("title");
-                News news = new News(imagesList, type, id, ga_prefix, title);
-                newsList.add(news);
-            }
-            mainNewsAdpater = new MainNewsAdpater(MainActivity.this, newsList);
-            mainListView.setAdapter(mainNewsAdpater);
-
-
-            JSONArray top_stories = result.getJSONArray("top_stories");
-            for (int i = 0; i < top_stories.length(); i++) {
-                JSONObject item = top_stories.getJSONObject(i);
-                String image = item.getString("image");
-                int type = item.getInt("type");
-                long id = item.getLong("id");
-                String ga_prefix = item.getString("ga_prefix");
-                String title = item.getString("title");
-                TopNews topNews = new TopNews(image, type, id, ga_prefix, title);
-                topNewsList.add(topNews);
-
-
-            }
-            Log.d("topNewsList.size", "" + topNewsList.size());
-
-            convenientBanner.setPages(
-                    new CBViewHolderCreator<LocalImageHolderView>() {
-                        @Override
-                        public LocalImageHolderView createHolder() {
-                            return new LocalImageHolderView();
-                        }
-                    }, topNewsList)
-                    //设置两个点图片作为翻页指示器，不设置则没有指示器，可以根据自己需求自行配合自己的指示器,不需要圆点指示器可用不设
-                    .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
-                    .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
-                    .startTurning(5000);
-
-        } catch (JSONException e) {
-            if (e != null) {
-                Log.e("Exception", e.toString());
-            }
-        }
-    }
-
-    public void loadBeforeData(String data) {
-        Log.d("getBeforeNew response", data);
-        try {
-            JSONObject result = new JSONObject(data);
-            JSONArray stories = result.getJSONArray("stories");
-
-            String topTitle = DateToString(result.getString("date"));
-            News topNew = new News(topTitle);
-            newsList.add(topNew);
-
-            for (int i = 0; i < stories.length(); i++) {
-                JSONObject item = stories.getJSONObject(i);
-                JSONArray images = item.getJSONArray("images");
-                ArrayList<String> imagesList = new ArrayList<String>();
-                for (int j = 0; j < images.length(); j++) {
-                    String imageUrl = images.getString(j);
-                    imagesList.add(imageUrl);
-                }
-                int type = item.getInt("type");
-                long id = item.getLong("id");
-                String ga_prefix = item.getString("ga_prefix");
-                String title = item.getString("title");
-                News news = new News(imagesList, type, id, ga_prefix, title);
-                newsList.add(news);
-            }
-            mainNewsAdpater.setList(newsList);
-        } catch (JSONException e) {
-            if (e != null) {
-                Log.e("Exception", e.toString());
-            }
-        }
-    }
-
-    public void getBeforeNew() {
-        Log.d("请求地址：", URLModel.URL_BEFOR_NEWS + lastDay);
-        OkHttpUtils.get().url(URLModel.URL_BEFOR_NEWS + lastDay).build().execute(new StringCallback() {
-            @Override
-            public void onError(Call call, Exception e) {
-                if (e != null) {
-                    Log.e("Exception", e.toString());
-                }
-            }
-
-            @Override
-            public void onResponse(String response) {
-                if (response != null) {
-                    loadBeforeData(response);
-                    ImageTools.donlandContentToDataBase(lastDay, response, 1);
-
-                }
-            }
-
-
-        });
-
-    }
-
 }

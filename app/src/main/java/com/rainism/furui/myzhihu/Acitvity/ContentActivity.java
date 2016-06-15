@@ -3,7 +3,7 @@ package com.rainism.furui.myzhihu.Acitvity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import com.orhanobut.logger.Logger;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -51,7 +51,7 @@ public class ContentActivity extends Activity {
         initView();
         if (getIntent().getExtras() != null) {
             News news = (News) getIntent().getExtras().getSerializable("news");
-            Log.d("news.title:", "" + news.getId());
+            Logger.d("news.title:", "" + news.getId());
             contentId=""+news.getId();
             loadNewsContent(news.getId() + "");
         }
@@ -75,8 +75,8 @@ public class ContentActivity extends Activity {
                 //让头部具有差速动画,如果不需要,可以不用设置
                 headerView.setTranslationY(currentY / 2);
                 //动态改变标题栏的透明度,注意转化为浮点型
-                Log.d("currentY", "" + currentY);
-                Log.d("maxY", "" + maxY);
+                Logger.d("currentY", "" + currentY);
+                Logger.d("maxY", "" + maxY);
                 float alpha = 1.0f * (maxY - currentY) / maxY;
                 cotentTitleView.setAlpha(alpha);
             }
@@ -96,13 +96,13 @@ public class ContentActivity extends Activity {
         }
     };
     public void loadNewsContent(String lastDay) {
-        Log.d("MainActivity", "文章内容:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 2));
+        Logger.d("MainActivity", "文章内容:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 2));
         if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 2).equals("") ||
                 ImageTools.searchMainNewsFileFromDataBase(lastDay, 2) == null) {
             getNewsContent(lastDay);
         } else {
             String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 2);
-            Log.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
+            Logger.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
 
             File file = new File(bodyUrl);
             String data = "";
@@ -147,8 +147,8 @@ public class ContentActivity extends Activity {
             for (String str : strs) {
                 styleString += "<link href=\"" + str.substring(1, str.length() - 1).replace("\\", "") + "\"/>";
             }
-            Log.d("body", styleString);
-            Log.d("shareUrl", newsContent.getShareUrl());
+            Logger.d("body", styleString);
+            Logger.d("shareUrl", newsContent.getShareUrl());
             String httpHeader = "<html lang=\"zh-CN\" class=\" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths show-download-banner\" style=\"\">\n" +
                     "<head>\n" +
                     "<meta charset=\"utf-8\">\n" +
@@ -168,7 +168,7 @@ public class ContentActivity extends Activity {
                     "<script src=\"/js/share.js?v=49768\"></script></body></html>", "text/html; charset=UTF-8", null);
 
             File file = new File(Environment.getExternalStorageDirectory().getPath() + "/index2.html");
-            Log.d("file.name", file.getAbsolutePath());
+            Logger.d("file.name", file.getAbsolutePath());
             try {
                 file.createNewFile();
                 BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -189,14 +189,14 @@ public class ContentActivity extends Activity {
             @Override
             public void onError(Call call, Exception e) {
                 if (e != null) {
-                    Log.e("Exception", e.toString());
+                    Logger.e("Exception", e.toString());
                 }
             }
 
             @Override
             public void onResponse(String response) {
                 if (response != null) {
-                    Log.d("response", response);
+                    Logger.json(response);
                     loadData(response);
                     ImageTools.donlandContentToDataBase(contentId, response, 2);
 

@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import com.orhanobut.logger.Logger;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -44,9 +44,9 @@ public class WelcomeActivity extends Activity {
         welcomeImageView = (ImageView) findViewById(R.id.welcome_imageview);
 
 
-        Log.d("长", "" + getWindowManager().getDefaultDisplay().getWidth());
-        Log.d("宽", "" + getWindowManager().getDefaultDisplay().getHeight());
-        Log.d("首页图片地址", "" + ImageTools.searchImageFileFromDataBase("首页", 0));
+        Logger.d("长", "" + getWindowManager().getDefaultDisplay().getWidth());
+        Logger.d("宽", "" + getWindowManager().getDefaultDisplay().getHeight());
+        Logger.d("首页图片地址", "" + ImageTools.searchImageFileFromDataBase("首页", 0));
 
         if(!ImageTools.searchImageFileFromDataBase("首页",0).equals("")){
             ImageTools.loadImageView(this,welcomeImageView,ImageTools.searchImageFileFromDataBase("首页",0));
@@ -58,13 +58,13 @@ public class WelcomeActivity extends Activity {
                 @Override
                 public void onError(Call call, Exception e) {
                     if (e != null) {
-                        Log.e("Exception", e.toString());
+                        Logger.e("Exception", e.toString());
                     }
                 }
 
                 @Override
                 public void onResponse(String s) {
-                    Log.d("首页返回结果", s);
+                    Logger.d("首页返回结果", s);
                     JSONObject result = null;
                     try {
                         result = new JSONObject(s);
@@ -73,7 +73,7 @@ public class WelcomeActivity extends Activity {
                         goNextActivity();
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Log.e("Exception", e.toString());
+                        Logger.e("Exception", e.toString());
                     }
 
                 }

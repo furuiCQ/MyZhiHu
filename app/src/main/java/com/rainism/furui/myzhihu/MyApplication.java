@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.orhanobut.logger.Logger;
 import com.rainism.furui.myzhihu.Tools.ImageTools;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.zhy.http.okhttp.OkHttpUtils;
@@ -31,7 +32,7 @@ public class MyApplication extends Application {
                 .build();
 
         OkHttpUtils.initClient(okHttpClient);
-
+        Logger.init("MY_ZHI_HU");
         ImageTools.ImageSqliteHepler imageSqliteHepler = new
                 ImageTools.ImageSqliteHepler(getApplicationContext(), "my_zhihu_data.db");
         ImageTools.sqliteDatabase = imageSqliteHepler.getReadableDatabase();

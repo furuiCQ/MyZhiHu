@@ -15,7 +15,7 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import com.orhanobut.logger.Logger;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
@@ -57,11 +57,11 @@ public class ImageTools {
 
                 @Override
                 public void onError() {
-                    Log.d("", "图片下载失败");
+                    Logger.d("", "图片下载失败");
                 }
             });
         } else {
-            Log.d("downlandImageView", "加载本地图片资源:" + localimageUrl);
+            Logger.d("downlandImageView", "加载本地图片资源:" + localimageUrl);
             loadImageView(context, imageView, localimageUrl);
         }
 
@@ -69,8 +69,8 @@ public class ImageTools {
 
     public static void loadImageView(final Context context, final ImageView imageView,
                                      String imageUrl) {
-        Log.d("imageUrl",imageUrl);
-        Log.d("imageView",imageView.toString());
+        Logger.d("imageUrl",imageUrl);
+        Logger.d("imageView",imageView.toString());
 
         Picasso.with(context).load("file:///" + imageUrl).into(imageView);
     }
@@ -191,13 +191,13 @@ public class ImageTools {
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         if (month < 10) {
-            Log.d("beforeData", "" + year + "0" + month + day);
+            Logger.d("beforeData", "" + year + "0" + month + day);
             lastDay = "" + year + "0" + month + day;
         } else {
-            Log.d("beforeData", "" + year + month + day);
+            Logger.d("beforeData", "" + year + month + day);
             lastDay = "" + year + month + day;
         }
-        Log.i("getBeforeDate","时间减一:"+lastDay);
+        Logger.i("getBeforeDate","时间减一:"+lastDay);
         return lastDay;
     }
     public static String searchMainNewsFileFromDataBase(String lastDay, int contentType) {
@@ -205,10 +205,10 @@ public class ImageTools {
             lastDay=getBeforeDate(lastDay);
         }
         String searchSql = "select * from  newsCachData where type=" + contentType + " and date='" + lastDay + "'";
-        Log.d("searchSql",searchSql);
+        Logger.d("searchSql",searchSql);
         Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
         cursor.moveToFirst();
-        Log.d("searchMainNewsFileFromDataBase", cursor.toString());
+        Logger.d("searchMainNewsFileFromDataBase", cursor.toString());
         String bodyUrl = "";
         if (cursor.moveToFirst()) {
             bodyUrl = cursor.getString(cursor.getColumnIndex("bodyUrl"));

@@ -1,10 +1,12 @@
-package com.rainism.furui.myzhihu.Acitvity;
+package com.rainism.furui.myzhihu.Fragment;
 
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import com.orhanobut.logger.Logger;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 
 import com.andexert.library.RippleView;
 import com.lzy.widget.HeaderViewPager;
+import com.rainism.furui.myzhihu.Acitvity.MainActivity;
 import com.rainism.furui.myzhihu.Model.News;
 import com.rainism.furui.myzhihu.Model.NewsContent;
 import com.rainism.furui.myzhihu.R;
@@ -38,7 +41,7 @@ import okhttp3.Call;
 /**
  * Created by Administrator on 2016/6/15.
  */
-public class ContentFragment extends Fragment{
+public class ContentFragment extends Fragment {
     NewsContent newsContent = new NewsContent();
     String contentId;
 
@@ -49,32 +52,38 @@ public class ContentFragment extends Fragment{
     HeaderViewPager scrollableLayout;
     RelativeLayout cotentTitleView;
     RippleView backView;
-
+    MainActivity mainActivity;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.activity_content,null);
-        initView();
-        if (getArguments() != null) {
-            News news = (News) getArguments().getSerializable("news");
-            Log.d("news.title:", "" + news.getId());
-            contentId=""+news.getId();
-            loadNewsContent(news.getId() + "");
-        }
+        View view = inflater.inflate(R.layout.activity_content, null);
+        initView(view);
+
         return view;
     }
+    public void loadData(){
+        mainActivity= (MainActivity) getActivity();
+        if(mainActivity.getFragmentData()!=null){
+            News news = mainActivity.getFragmentData();
+            //     News news = (News) getArguments().getSerializable("news");
+            Logger.d("news.title:", "" + news.getId());
+            contentId = "" + news.getId();
+            loadNewsContent(news.getId() + "");
+        }
+    }
 
-    public void initView() {
-        backView=(RippleView)getActivity().findViewById(R.id.content_back);
-        cotentTitleView = (RelativeLayout)getActivity(). findViewById(R.id.content_title);
-        webView = (ContentWebView)getActivity(). findViewById(R.id.content_webview);
-        headerView = (RelativeLayout) getActivity().findViewById(R.id.content_banner);
-        headerViewImageView = (ImageView) getActivity().findViewById(R.id.banner_imageview);
+
+    public void initView(View view) {
+        backView = (RippleView) view.findViewById(R.id.content_back);
+        cotentTitleView = (RelativeLayout) view.findViewById(R.id.content_title);
+        webView = (ContentWebView) view.findViewById(R.id.content_webview);
+        headerView = (RelativeLayout) view.findViewById(R.id.content_banner);
+        headerViewImageView = (ImageView) view.findViewById(R.id.banner_imageview);
         headerViewImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        headerViewTextView = (TextView) getActivity().findViewById(R.id.banner_textview);
+        headerViewTextView = (TextView) view.findViewById(R.id.banner_textview);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
         webView.getSettings().setJavaScriptEnabled(true);
-        scrollableLayout = (HeaderViewPager) getActivity().findViewById(R.id.scrollableLayout);
+        scrollableLayout = (HeaderViewPager) view.findViewById(R.id.scrollableLayout);
         scrollableLayout.setCurrentScrollableContainer(webView);
         scrollableLayout.setOnScrollListener(new HeaderViewPager.OnScrollListener() {
             @Override
@@ -82,34 +91,36 @@ public class ContentFragment extends Fragment{
                 //让头部具有差速动画,如果不需要,可以不用设置
                 headerView.setTranslationY(currentY / 2);
                 //动态改变标题栏的透明度,注意转化为浮点型
-                Log.d("currentY", "" + currentY);
-                Log.d("maxY", "" + maxY);
+                Logger.d("currentY", "" + currentY);
+                Logger.d("maxY", "" + maxY);
                 float alpha = 1.0f * (maxY - currentY) / maxY;
                 cotentTitleView.setAlpha(alpha);
             }
         });
         backView.setOnClickListener(onClickListener);
     }
-    View.OnClickListener onClickListener=new View.OnClickListener(){
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.content_back:
-
+                    mainActivity.setPagerNumb(0);
                     break;
                 default:
                     break;
             }
         }
     };
+
     public void loadNewsContent(String lastDay) {
-        Log.d("MainActivity", "文章内容:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 2));
+        Logger.d("MainActivity", "文章内容:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 2));
         if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 2).equals("") ||
                 ImageTools.searchMainNewsFileFromDataBase(lastDay, 2) == null) {
             getNewsContent(lastDay);
         } else {
             String bodyUrl = ImageTools.searchMainNewsFileFromDataBase(lastDay, 2);
-            Log.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
+            Logger.d("MainActivity loadLocalBeforeData", "加载本地数据:" + bodyUrl);
 
             File file = new File(bodyUrl);
             String data = "";
@@ -154,8 +165,8 @@ public class ContentFragment extends Fragment{
             for (String str : strs) {
                 styleString += "<link href=\"" + str.substring(1, str.length() - 1).replace("\\", "") + "\"/>";
             }
-            Log.d("body", styleString);
-            Log.d("shareUrl", newsContent.getShareUrl());
+            Logger.d("body", styleString);
+            Logger.d("shareUrl", newsContent.getShareUrl());
             String httpHeader = "<html lang=\"zh-CN\" class=\" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths show-download-banner\" style=\"\">\n" +
                     "<head>\n" +
                     "<meta charset=\"utf-8\">\n" +
@@ -175,7 +186,7 @@ public class ContentFragment extends Fragment{
                     "<script src=\"/js/share.js?v=49768\"></script></body></html>", "text/html; charset=UTF-8", null);
 
             File file = new File(Environment.getExternalStorageDirectory().getPath() + "/index2.html");
-            Log.d("file.name", file.getAbsolutePath());
+            Logger.d("file.name", file.getAbsolutePath());
             try {
                 file.createNewFile();
                 BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -196,14 +207,14 @@ public class ContentFragment extends Fragment{
             @Override
             public void onError(Call call, Exception e) {
                 if (e != null) {
-                    Log.e("Exception", e.toString());
+                    Logger.e("Exception", e.toString());
                 }
             }
 
             @Override
             public void onResponse(String response) {
                 if (response != null) {
-                    Log.d("response", response);
+                    Logger.json(response);
                     loadData(response);
                     ImageTools.donlandContentToDataBase(contentId, response, 2);
 
