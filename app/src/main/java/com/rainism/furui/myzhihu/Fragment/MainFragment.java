@@ -74,6 +74,7 @@ public class MainFragment extends Fragment {
 
         getNowData();
         loadLocalTodayData();
+
         return view;
 
     }
@@ -147,7 +148,6 @@ public class MainFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Logger.i("onItemClick position", "" + position);
             Logger.i("onItemClick id", "" + id);
-
             News news = newsList.get((int) id);
             MainActivity mainActivity=(MainActivity)getActivity();
             mainActivity.setFragmentData(news);
@@ -324,6 +324,10 @@ public class MainFragment extends Fragment {
                     .setPageIndicator(new int[]{R.drawable.ic_page_indicator, R.drawable.ic_page_indicator_focused})
                     .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
                     .startTurning(5000);
+
+            News news = newsList.get(0);
+            MainActivity mainActivity=(MainActivity)getActivity();
+            mainActivity.setFragmentData(news);
 
         } catch (JSONException e) {
             if (e != null) {

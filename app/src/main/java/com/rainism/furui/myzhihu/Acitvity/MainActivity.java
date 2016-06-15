@@ -44,14 +44,11 @@ public class MainActivity extends FragmentActivity {
         viewPager.setCurrentItem(pagerNumb);
         viewPager.setOffscreenPageLimit(1);
     }
+
     public void setPagerNumb(int numb){
         pagerNumb=numb;
         viewPager.setCurrentItem(pagerNumb);
 
-    }
-
-    public ViewPager getViewPager() {
-        return viewPager;
     }
     public void setFragmentData(News news){
         this.news=news;
