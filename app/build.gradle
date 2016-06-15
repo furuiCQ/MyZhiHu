@@ -30,4 +30,6 @@ dependencies {
     compile 'com.lzy.widget:view-core:0.2.1'
     compile 'com.android.support:support-annotations:23.3.0'
     compile 'com.android.support:support-v4:23.3.0'
+
+
 }

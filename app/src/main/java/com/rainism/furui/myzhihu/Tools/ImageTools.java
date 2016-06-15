@@ -1,6 +1,8 @@
 package com.rainism.furui.myzhihu.Tools;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -11,6 +13,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -22,7 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 
 
 /**
@@ -150,7 +153,7 @@ public class ImageTools {
     public static void donlandContentToDataBase(String title, String body, int type) {
         String bodyUrl = Environment.getExternalStorageDirectory().getPath()
                 + "/" + title + ".txt";
-        File file = new File(bodyUrl);
+          File file = new File(bodyUrl);
         try {
             if (!file.exists()) {
                 file.createNewFile();
@@ -205,7 +208,7 @@ public class ImageTools {
         Log.d("searchSql",searchSql);
         Cursor cursor = sqliteDatabase.rawQuery(searchSql, null);
         cursor.moveToFirst();
-        Log.d("searchMainNewsFileFromDataBase",cursor.toString());
+        Log.d("searchMainNewsFileFromDataBase", cursor.toString());
         String bodyUrl = "";
         if (cursor.moveToFirst()) {
             bodyUrl = cursor.getString(cursor.getColumnIndex("bodyUrl"));

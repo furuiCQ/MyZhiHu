@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.view.View.OnClickListener;
 
+import com.andexert.library.RippleView;
 import com.lzy.widget.HeaderViewPager;
 import com.rainism.furui.myzhihu.Model.News;
 import com.rainism.furui.myzhihu.Model.NewsContent;
@@ -40,7 +43,7 @@ public class ContentActivity extends Activity {
     TextView headerViewTextView;
     HeaderViewPager scrollableLayout;
     RelativeLayout cotentTitleView;
-
+    RippleView backView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,7 @@ public class ContentActivity extends Activity {
     }
 
     public void initView() {
+        backView=(RippleView)findViewById(R.id.content_back);
         cotentTitleView = (RelativeLayout) findViewById(R.id.content_title);
         webView = (ContentWebView) findViewById(R.id.content_webview);
         headerView = (RelativeLayout) findViewById(R.id.content_banner);
@@ -80,8 +84,20 @@ public class ContentActivity extends Activity {
 
             }
         });
+        backView.setOnClickListener(onClickListener);
     }
-
+    OnClickListener onClickListener=new OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.content_back:
+                    ContentActivity.this.finish();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
     public void loadNewsContent(String lastDay) {
         Log.d("MainActivity", "文章内容:" + ImageTools.searchMainNewsFileFromDataBase(lastDay, 2));
         if (ImageTools.searchMainNewsFileFromDataBase(lastDay, 2).equals("") ||
